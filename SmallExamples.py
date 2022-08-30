@@ -13,5 +13,5 @@ def buildGraph():
     G.add_edge(7, 8, color="green")
     G.add_edge(6, 8, color="green")
     G.add_edge(3, 9, color="green")
-    
+    G.add_edge(2, 9, color="red")
     return G
