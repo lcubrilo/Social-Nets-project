@@ -1,12 +1,13 @@
 def filterComponents(clusters):
-    coalitions, wannabes = [], []
+    coalitions, noncoalitions, problemEdges = [], [], []
     for c in clusters:
         status = isCoalition(c)
         if status[0]:
             coalitions.append(c)
         else:
-            wannabes.append((c, status[1]))
-    return coalitions, wannabes
+            noncoalitions.append(c)
+            problemEdges.append(status[1])
+    return coalitions, noncoalitions, problemEdges
 
 import networkx as nx
 def isCoalition(cluster):

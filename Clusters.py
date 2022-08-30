@@ -22,27 +22,27 @@ def iterateThruComponentNames(name):
         char = name[counter]
         res = incChar(char) + res
         if res[0] != "A":
-            return name[:counter] + res
+            name = name[:counter] + res; return name
         if counter == -len(name):
-            return "A" + res
+            name = "A" + res; return name
     
-name = "A"
-for i in range(100):
-    print(name)
+
     name = iterateThruComponentNames(name)
 
 def BFSComponents(G):
     visited = []
     components = []
-
-    def BFSComponent(node):
+    componentName = "A"
+    def BFSComponent(node, compName):
         comp = nx.Graph()
         queue = deque()
 
         def pushNode(x):
-            comp.add_node(x)
+            comp.add_node(x, component = compName)
+            G.nodes[x]["component"] = compName
             visited.append(x)
             queue.append(x)
+            
         def onlyPositiveNeighbors(x):
             positiveNeighbors = []
             for neighbor in G.neighbors(x):
@@ -64,7 +64,8 @@ def BFSComponents(G):
     #G = nx.Graph()
     for node in G:
         if node not in visited:
-            components.append(BFSComponent(node))
+            components.append(BFSComponent(node, componentName))
+            componentName = iterateThruComponentNames(componentName)
 
     for component in components:
         checkForNegative(G, component)
