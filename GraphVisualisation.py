@@ -1,4 +1,3 @@
-
 import networkx as nx
 import matplotlib.pyplot as plt
 
@@ -22,7 +21,7 @@ def showComponentGraph(G, components):
     nodeColors = []
     baseNumber = 110*min(9, math.ceil(noComp**0.5)); i=1
     for c in components:
-        print(c.nodes, c.edges)
+        #print(c.nodes, c.edges)
         pos = nx.spring_layout(c, seed=random.randint(5, 31415))
         plt.subplot(baseNumber+i); i+=1 
         if not nodeColors: nodeColors = giveColors()

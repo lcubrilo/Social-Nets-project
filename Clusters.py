@@ -1,7 +1,15 @@
+from tabnanny import check
 import networkx as nx
 from collections import deque
 
 #Dobijanje klastera (komponenti dobijene uklanjanjem negativnih grana)
+def checkForNegative(G, cluster):
+    for node1 in cluster.nodes:
+        for node2 in cluster.nodes:
+            if G.has_edge(node1, node2):
+                if G.edges[node1, node2]["color"] == "red":
+                    cluster.add_edge(node1, node2, color="red")
+
 def BFSComponents(G):
     visited = []
     components = []
@@ -33,9 +41,12 @@ def BFSComponents(G):
         return comp
   
     #G = nx.Graph()
-    for node in G.nodes:
+    for node in G:
         if node not in visited:
             components.append(BFSComponent(node))
+
+    for component in components:
+        checkForNegative(G, component)
 
     return components
 
