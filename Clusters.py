@@ -10,6 +10,27 @@ def checkForNegative(G, cluster):
                 if G.edges[node1, node2]["color"] == "red":
                     cluster.add_edge(node1, node2, color="red")
 
+
+def iterateThruComponentNames(name):
+    def incChar(char):
+        num = ord(char) - ord("A") + 1
+        return chr(num % 26 + ord("A"))
+    counter = 0
+    res = ""
+    while True:
+        counter -= 1
+        char = name[counter]
+        res = incChar(char) + res
+        if res[0] != "A":
+            return name[:counter] + res
+        if counter == -len(name):
+            return "A" + res
+    
+name = "A"
+for i in range(100):
+    print(name)
+    name = iterateThruComponentNames(name)
+
 def BFSComponents(G):
     visited = []
     components = []
