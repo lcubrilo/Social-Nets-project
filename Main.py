@@ -7,7 +7,7 @@ def main():
     components = Clusters.BFSComponents(G);
     print("Got clusters") 
     GraphVisualisation.showComponentGraph(G, components)
-    GraphVisualisation.showGraph(G, components)
+    GraphVisualisation.showGraph(G, components, "Small example")
     coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
     #print("Following components:\n {}\n\tCoalitions: {}\n\t Other clusters:{}".format(components, coalitions, noncoalitions))
     
@@ -25,7 +25,7 @@ def main():
         print("\tProblematic edges: ", prEd)
     
     G2 = GraphOfClusters.create(G)
-    GraphVisualisation.showGraph(G2)
+    GraphVisualisation.showGraph(G2, graphname="Components graph")
 
     print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
 

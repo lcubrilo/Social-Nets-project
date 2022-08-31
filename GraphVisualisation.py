@@ -1,6 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 from statistics import mean
+from threading import Thread
 
 def getComponentName(component):
     return component.nodes[list(component.nodes)[0]]["component"]
@@ -17,7 +18,8 @@ def showComponentNames(pos, components):
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
-def showGraph(G, components = []):
+def showGraph(G, components = [], graphname = "graph"):
+    graphname += ".dot"
     pos = nx.spring_layout(G, seed=50)
     """
     edge_labels = nx.get_edge_attributes(G,'color')
@@ -30,13 +32,17 @@ def showGraph(G, components = []):
     if edAt :
         edges, edgeColors = zip(*edAt.items())
     else: edgeColors = ["black"]
-    if type(G) == type(nx.MultiGraph()):
-        from networkx.drawing.nx_agraph import write_dot; write_dot(G,'multi.dot')
-        import pydot; (graph,) = pydot.graph_from_dot_file('multi.dot'); graph.write_png('somefile.png')
-        from PIL import Image; Image.open('somefile.png').show()
-        #nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
-    else:
-        nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True)
+
+    from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
+    import os; Thread(target=lambda: os.startfile(graphname)).start()
+
+    #if type(G) == type(nx.MultiGraph()):
+        
+        ##import pydot; (graph,) = pydot.graph_from_dot_file('multi.dot'); graph.write_png('somefile.png')
+        ###from PIL import Image; Image.open('somefile.png').show()
+        ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
+    #else:
+    #    nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True)
     #nx.draw(G, pos)
     plt.show()
 
