@@ -33,8 +33,8 @@ def showGraph(G, components = [], graphname = "graph"):
         edges, edgeColors = zip(*edAt.items())
     else: edgeColors = ["black"]
 
-    from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
-    import os; Thread(target=lambda: os.startfile(graphname)).start()
+    """from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
+    import os; Thread(target=lambda: os.startfile(graphname)).start()"""
 
     #if type(G) == type(nx.MultiGraph()):
         
@@ -42,7 +42,7 @@ def showGraph(G, components = [], graphname = "graph"):
         ###from PIL import Image; Image.open('somefile.png').show()
         ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
     #else:
-    #    nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True)
+    nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True)
     #nx.draw(G, pos)
     plt.show()
 
