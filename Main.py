@@ -1,19 +1,16 @@
 import SmallExamples, GraphVisualisation, Clusters, Coalitions, GraphOfClusters
 
 
-def main():
-    G = SmallExamples.buildGraph()
-    
-    components = Clusters.BFSComponents(G);
+def main(G):
+    components = Clusters.BFSComponents(G)
     print("Got clusters") 
     GraphVisualisation.showComponentGraph(G, components)
     GraphVisualisation.showGraph(G, components, "Small example")
     coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
-    #print("Following components:\n {}\n\tCoalitions: {}\n\t Other clusters:{}".format(components, coalitions, noncoalitions))
     
-    print("Following components: ")
+    """print("Following components: ")
     for c in components:
-        print(c.nodes, c.edges)
+        print(c.nodes, c.edges)"""
     
     for coal in coalitions:
         coalitionName = GraphVisualisation.getComponentName(coal)
@@ -29,5 +26,23 @@ def main():
 
     print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
 
-print("Yo")
-main()
+
+#main(SmallExamples.buildGraph())
+
+import GenerateBigNets
+
+G = GenerateBigNets.bigGraph(100)
+GraphVisualisation.showGraph(G)
+
+print("Main is done.")
+
+"""
+import networkx as nx
+edges, edgeColors = zip(*nx.get_edge_attributes(G, 'color').items())
+for (e, eC) in zip(edges, edgeColors):
+    print(e, eC)"""
+
+edges = G.edges()
+colors = [G[u][v]['color'] for u,v in edges]
+for e, c in zip(edges, colors):
+    print(e, c)

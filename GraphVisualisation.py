@@ -7,7 +7,7 @@ def getComponentName(component):
     return component.nodes[list(component.nodes)[0]]["component"]
 
 def showComponentName(pos, component):
-    positions = [pos[node] for node in component]
+    positions = [pos[node] for node in component.nodes]
     x, y = [p[0] for p in positions], [p[1] for p in positions]
     plt.text(mean(x), mean(y), getComponentName(component))
 
@@ -33,8 +33,8 @@ def showGraph(G, components = [], graphname = "graph"):
         edges, edgeColors = zip(*edAt.items())
     else: edgeColors = ["black"]
 
-    """from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
-    import os; Thread(target=lambda: os.startfile(graphname)).start()"""
+    from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
+    import os; Thread(target=lambda: os.startfile(graphname)).start()
 
     #if type(G) == type(nx.MultiGraph()):
         
@@ -48,23 +48,27 @@ def showGraph(G, components = [], graphname = "graph"):
 
 import math
 import random
-def showComponentGraph(G, components):
-    pos = nx.spring_layout(G, seed=20)
+def showComponentGraph(components):
+    #pos = nx.spring_layout(G, seed=20)
     noComp = len(components)
-    nodeColors = []
-    baseNumber = 110*min(9, math.ceil(noComp**0.5)); i=1
+    nodeColors = giveColors()
+    matrixLength = math.ceil(noComp**0.5)
+    #baseNumber = 110*matrixLength;
+    fig, axs = plt.subplots(matrixLength, matrixLength); i=0
     for c in components:
         #print(c.nodes, c.edges)
-        #pos_iter = nx.spring_layout(c, seed=random.randint(5, 31415))
-        plt.subplot(baseNumber+i); i+=1 
-        if not nodeColors: nodeColors = giveColors()
+        
+        #plt.subplot(baseNumber + i%matrixLength + 1); i+=1 
+        nodeColor = next(nodeColors, None)
+        if not nodeColor: nodeColors = giveColors()
         edgeinfo = nx.get_edge_attributes(c, 'color').items()
         if edgeinfo:
             edges, edgeColors = zip(*edgeinfo)
         else: edgeColors = "black"
-        nx.draw(c, pos, node_color = next(nodeColors), edge_color=edgeColors, width=2, with_labels=True)
-        showComponentNames(pos, components)
-    plt.show()
+        pos = nx.spring_layout(c, seed=random.randint(5, 31415))
+        nx.draw(c, pos, node_color = nodeColor, edge_color=edgeColors, width=2, with_labels=True, ax = axs[i//matrixLength, i%matrixLength]); i+=1
+        showComponentNames(pos, c)
+    plt.show(block=True)
 
 def giveColors():
     sampleColors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
