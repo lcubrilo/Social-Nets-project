@@ -1,7 +1,7 @@
 import networkx as nx
 from random import shuffle, random, choice, sample
 from numpy.random import poisson
-from ComponentNamesColors import iterateThruComponentNames
+from ..ComponentNamesColors import iterateThruComponentNames
 from math import log, ceil
 #import GraphVisualisation
 

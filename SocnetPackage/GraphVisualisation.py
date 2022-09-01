@@ -2,7 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from statistics import mean
 from threading import Thread
-from ComponentNamesColors import giveColors
+from .ComponentNamesColors import giveColors
 
 def getComponentName(component):
     return component.nodes[list(component.nodes)[0]]["component"]

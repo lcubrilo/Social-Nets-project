@@ -1,6 +1,6 @@
 #Ignore __pycache__
 __pycache__
-
+.vscode
 
 #For now, ignore printed figures
 Figures
@@ -8,5 +8,9 @@ Figures
 *.png
 #including dot files
 
+#Gave up on those files
 GenerateComponentsForBig.py
 BigExamplesGen.py
+
+#Stuff manuelly moved to the side
+trash

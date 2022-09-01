@@ -1,5 +1,6 @@
-import SmallExamples, GraphVisualisation, Clusters, Coalitions, GraphOfClusters
-
+from SocnetPackage import GraphVisualisation
+from SocnetPackage.DataGeneration import SmallExamples, GenerateBigNets
+from SocnetPackage.BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
 
 def testGraph(G):
     components = Clusters.BFSComponents(G)
@@ -37,7 +38,6 @@ def testGraph(G):
 """main(SmallExamples.buildGraph())
 print("Main is done for small graph.")
 """
-import GenerateBigNets
 
 for x, clusterable in zip([30, 65, 1000, 10], [False, True, False, False]):
     testGraph(GenerateBigNets.bigGraph(x, clusterable))

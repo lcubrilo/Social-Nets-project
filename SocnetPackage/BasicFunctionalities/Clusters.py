@@ -1,7 +1,7 @@
 from tabnanny import check
 import networkx as nx
 from collections import deque
-from ComponentNamesColors import iterateThruComponentNames, giveColors
+from ..ComponentNamesColors import iterateThruComponentNames, giveColors
 from random import choice
 
 #Dobijanje klastera (komponenti dobijene uklanjanjem negativnih grana)
