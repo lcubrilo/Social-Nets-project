@@ -5,7 +5,8 @@ def create(G):
 
     for node in G.nodes: 
         tmpComponent = G.nodes[node]["component"]
-        result.add_node(tmpComponent)
+        tmpColor = G.nodes[node]["color"]
+        result.add_node(tmpComponent, color=tmpColor)
     
     for edge in G.edges():
         node1, node2 = G.nodes[edge[0]], G.nodes[edge[1]]

@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from statistics import mean
 from threading import Thread
+from ComponentNamesColors import giveColors
 
 def getComponentName(component):
     return component.nodes[list(component.nodes)[0]]["component"]
@@ -18,21 +19,29 @@ def showComponentNames(pos, components):
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
-def showGraph(G, components = [], graphname = "graph"):
+def showGraph(G, components = [], graphname = "graph", AX = None):
     graphname += ".dot"
-    pos = nx.spring_layout(G, seed=50)
+    
     """
     edge_labels = nx.get_edge_attributes(G,'color')
     print(edge_labels)
     nx.draw_networkx_edge_labels(G, pos, edge_labels)"""
 
-    showComponentNames(pos, components)          
-
     edAt = nx.get_edge_attributes(G, 'color')
     if edAt :
         edges, edgeColors = zip(*edAt.items())
-    else: edgeColors = ["black"]
-
+        weights = []
+        for e, eC in zip(edges, edgeColors):
+            weight_val = 1 if eC == "green" else 3
+            G.add_edge(e[0], e[1], weight = weight_val/0.5)
+            weights.append(3/weight_val)
+        
+    else: edgeColors = ["black"]; weights = [1.5]; 
+    
+    nodeColors = [G.nodes[n]["color"] for n in G.nodes]
+    
+    pos = nx.kamada_kawai_layout(G)
+    showComponentNames(pos, components)
     """ from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
     import os; Thread(target=lambda: os.startfile(graphname)).start()"""
 
@@ -42,14 +51,14 @@ def showGraph(G, components = [], graphname = "graph"):
         ###from PIL import Image; Image.open('somefile.png').show()
         ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
     #else:
-    nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True)
+    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=type(list(G.nodes)[0])==str, font_color='white', ax = AX)
     #nx.draw(G, pos)
-    plt.show()
+    if AX == None:
+        plt.show()
 
 import math
-import random
 def showComponentGraph(components):
-    #pos = nx.spring_layout(G, seed=20)
+    #pos = nx.kamada_kawai_layout(G, seed=20)
     noComp = len(components)
     nodeColors = giveColors()
     matrixLength = math.ceil(noComp**0.5)
@@ -65,13 +74,15 @@ def showComponentGraph(components):
         if edgeinfo:
             edges, edgeColors = zip(*edgeinfo)
         else: edgeColors = "black"
-        pos = nx.spring_layout(c, seed=random.randint(5, 31415))
-        nx.draw(c, pos, node_color = nodeColor, edge_color=edgeColors, width=2, with_labels=True, ax = axs[i//matrixLength, i%matrixLength]); i+=1
+        pos = nx.kamada_kawai_layout(c)
+        AX = axs[i//matrixLength, i%matrixLength] if matrixLength > 1 else axs
+        nx.draw(c, pos, node_color = nodeColor, edge_color=edgeColors, width=2, with_labels=True, ax = AX); i+=1
         showComponentNames(pos, c)
     plt.show(block=True)
 
-def giveColors():
-    sampleColors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
-    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
-    random.shuffle(sampleColors)
-    return iter(sampleColors)
+def showGraphAndComponents(G, components, G2):
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    showGraph(G2, AX = ax1)
+    showGraph(G, components, AX = ax2)
+    
+    plt.show()

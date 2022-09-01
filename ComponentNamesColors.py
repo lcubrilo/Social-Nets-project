@@ -12,3 +12,10 @@ def iterateThruComponentNames(name):
             name = name[:counter] + res; return name
         if counter == -len(name):
             name = "A" + res; return name
+
+from random import shuffle
+def giveColors():
+    sampleColors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 
+    'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+    shuffle(sampleColors)
+    return iter(sampleColors)            

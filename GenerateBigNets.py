@@ -1,7 +1,7 @@
 import networkx as nx
 from random import shuffle, random, choice
 from numpy.random import poisson
-from ComponentNames import iterateThruComponentNames
+from ComponentNamesColors import iterateThruComponentNames
 
 #import GraphVisualisation
 
@@ -11,7 +11,7 @@ def bigGraph(numOfNodes):
     currCompName = "A"
 
     while nodesMade < numOfNodes:
-        compSize = poisson(6)
+        compSize = poisson(6)+1
         generated = generateComponent(compSize, nodesMade, name = currCompName)
         if not generated:
             continue
@@ -107,7 +107,7 @@ def addEdgesHilbertIdea(G, val = "", attr = "color"):
     listOfNodes = list(G.nodes)
     N = len(listOfNodes)
     p = random()/(N-1) if N > 1 else random()
-    coef = 1.5 if val == "green" else 0.9
+    coef = 2 if val == "green" else 0.9
     p*= coef
 
     maxDegree = max([G.degree(n) for n in G.nodes])
