@@ -1,6 +1,8 @@
 from tabnanny import check
 import networkx as nx
 from collections import deque
+from ComponentNamesColors import iterateThruComponentNames, giveColors
+from random import choice
 
 #Dobijanje klastera (komponenti dobijene uklanjanjem negativnih grana)
 def checkForNegative(G, cluster):
@@ -11,38 +13,22 @@ def checkForNegative(G, cluster):
                     cluster.add_edge(node1, node2, color="red")
 
 
-def iterateThruComponentNames(name):
-    def incChar(char):
-        num = ord(char) - ord("A") + 1
-        return chr(num % 26 + ord("A"))
-    counter = 0
-    res = ""
-    while True:
-        counter -= 1
-        char = name[counter]
-        res = incChar(char) + res
-        if res[0] != "A":
-            name = name[:counter] + res; return name
-        if counter == -len(name):
-            name = "A" + res; return name
-    
-
-    name = iterateThruComponentNames(name)
-
-def BFSComponents(G):
+def BFSComponents(G, legitimateLinksFunction = None):
     visited = []
     components = []
     componentName = "A"
     def BFSComponent(node, compName):
         comp = nx.Graph()
         queue = deque()
+        thisComponentsColor = choice(list(giveColors()))
 
         def pushNode(x):
             comp.add_node(x, component = compName)
             G.nodes[x]["component"] = compName
+            G.nodes[x]["color"] = thisComponentsColor
             visited.append(x)
             queue.append(x)
-            
+        
         def onlyPositiveNeighbors(x):
             positiveNeighbors = []
             for neighbor in G.neighbors(x):
