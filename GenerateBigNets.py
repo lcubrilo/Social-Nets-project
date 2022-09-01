@@ -1,14 +1,14 @@
 import networkx as nx
-from random import shuffle, random, choice
+from random import shuffle, random, choice, sample
 from numpy.random import poisson
 from ComponentNamesColors import iterateThruComponentNames
-
+from math import log, ceil
 #import GraphVisualisation
 
-def bigGraph(numOfNodes):
+def bigGraph(numOfNodes, clusterable = True):
     nodesMade = 0
     components = []
-    currCompName = "A"
+    currCompName = "A"   
 
     while nodesMade < numOfNodes:
         compSize = poisson(6)+1
@@ -22,15 +22,42 @@ def bigGraph(numOfNodes):
     """for c in components:
         print(c.nodes)
 """
+    
     #GraphVisualisation.showComponentGraph(components)
     graphOfComponents = generateGraphOfComponents(components)
     #GraphVisualisation.showGraph(graphOfComponents)
-    return graphOfComponents2BigGraph(graphOfComponents, components)
+    res = graphOfComponents2BigGraph(graphOfComponents, components)
+
+    if not clusterable:
+        edges = list(res.edges)
+        howManyToCorrupt = ceil(0.05*len(edges) + 0.7) + 1
+        for edge in sample(edges, howManyToCorrupt):
+            u, v = edge[0], edge[1]
+            res.add_edge(u, v, color="red")
+
+    return res
+    """
+    Very meta: since this method didn't work as intended, had to put it to the chopping block... look how they massacred my boy
+        p = (1/log(numOfNodes, 2))
+        #print("Ruin at least{}% of clusters".format(round(p*100, 2)))
+        numberToRuin = ceil(p*len(components))
+        print("Ruin exactly {} clusters".format(numberToRuin))
+        for myBoy in sample(population=components, k=numberToRuin):
+            lookHowTheyMassacred(myBoy)
+
+    
+
+def lookHowTheyMassacred(component):
+    listOfEdges = list(component.edges)
+    howManyEdgesToRuin = poisson(ceil(0.05*len(listOfEdges))) + 1
+    whichEdgesToRuin = sample(listOfEdges, howManyEdgesToRuin)
+    for edge in whichEdgesToRuin:
+        component.add_edge(edge[0], edge[1], color = "red")"""
 
 def graphOfComponents2BigGraph(g, components):
     BigGraph = nx.Graph()
     for c in components:
-        BigGraph.add_edges_from(c.edges, color = "green")
+        BigGraph.add_edges_from(c.edges, color="green")
 
     print("Converting it to big graph")
     for edge in g.edges:
@@ -101,7 +128,7 @@ def connectEmptyGraph(G, val):
         G.add_edge(choice(connected), node, color = val)
         connected.append(node)
    
-def addEdgesHilbertIdea(G, val = "", attr = "color"):
+def addEdgesHilbertIdea(G, val = "", attr = "color", ruinCoalition = False):
     #p*(n-1) goes from 1 to 4 => guarantees gigantic component if started with empty graph
     #p = (1+random())**2/(N-1) 
     listOfNodes = list(G.nodes)
@@ -121,5 +148,6 @@ def addEdgesHilbertIdea(G, val = "", attr = "color"):
         G.add_edges_from(edgesToAdd, color = val)
     else:
         G.add_edges_from(edgesToAdd)
+
         
 

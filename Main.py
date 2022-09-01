@@ -14,7 +14,7 @@ def testGraph(G):
     
     for coal in coalitions:
         coalitionName = GraphVisualisation.getComponentName(coal)
-        print("Coalition {}: {} {}".format(coalitionName, coal.nodes, coal.edges))
+        #print("Coalition {}: {} {}".format(coalitionName, coal.nodes, coal.edges))
     
     for nonc, prEd in zip(noncoalitions, problemEdges):
         noncoalitionName = GraphVisualisation.getComponentName(coal)
@@ -23,9 +23,15 @@ def testGraph(G):
     
     G2 = GraphOfClusters.create(G)
     #GraphVisualisation.showGraph(G2, graphname="Components graph")
+    #print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
 
-    GraphVisualisation.showGraphAndComponents(G, components, G2)
-    print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
+    ttl1 = "{} nodes, {} edges.".format(len(G.nodes), len(G.edges))
+    numComp, numCoal = len(components), len(coalitions)
+    ttl2 = "{} clusters, {} coalitions ({}%).".format(numComp, numCoal, round(100*numCoal/numComp, 2))
+    areWeClusterable = ("truly" if len(problemEdges) == 0 else "not")
+    ttl ="What you are currently seeing is " + areWeClusterable + " a clusterable graph."
+    GraphVisualisation.showGraphAndComponents(G, components, G2, [ttl, ttl1, ttl2])
+    
 
 
 """main(SmallExamples.buildGraph())
@@ -33,5 +39,5 @@ print("Main is done for small graph.")
 """
 import GenerateBigNets
 
-for x in [30, 1000, 65, 10]:
-    testGraph(GenerateBigNets.bigGraph(x))
+for x, clusterable in zip([30, 65, 1000, 10], [False, True, False, False]):
+    testGraph(GenerateBigNets.bigGraph(x, clusterable))
