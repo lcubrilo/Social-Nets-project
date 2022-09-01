@@ -3,7 +3,7 @@ from random import shuffle, random, choice
 from numpy.random import poisson
 from ComponentNames import iterateThruComponentNames
 
-import GraphVisualisation
+#import GraphVisualisation
 
 def bigGraph(numOfNodes):
     nodesMade = 0
@@ -22,9 +22,9 @@ def bigGraph(numOfNodes):
     """for c in components:
         print(c.nodes)
 """
-    GraphVisualisation.showComponentGraph(components)
+    #GraphVisualisation.showComponentGraph(components)
     graphOfComponents = generateGraphOfComponents(components)
-    GraphVisualisation.showGraph(graphOfComponents)
+    #GraphVisualisation.showGraph(graphOfComponents)
     return graphOfComponents2BigGraph(graphOfComponents, components)
 
 def graphOfComponents2BigGraph(g, components):
@@ -55,7 +55,6 @@ def connect2Components(G, c1, c2, L):
         L -= 1
 
 def generateComponent(numOfNodes, startingIndex = 0, startingGraph = None, name = None):
-    if numOfNodes < 2: return
     #First add nodes, then the edges
     if not startingGraph:
         G = nx.Graph()
@@ -107,11 +106,9 @@ def addEdgesHilbertIdea(G, val = "", attr = "color"):
     #p = (1+random())**2/(N-1) 
     listOfNodes = list(G.nodes)
     N = len(listOfNodes)
-    p = random()/(N-1) 
+    p = random()/(N-1) if N > 1 else random()
     coef = 1.5 if val == "green" else 0.9
     p*= coef
-
-    
 
     maxDegree = max([G.degree(n) for n in G.nodes])
 

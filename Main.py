@@ -4,7 +4,7 @@ import SmallExamples, GraphVisualisation, Clusters, Coalitions, GraphOfClusters
 def main(G):
     components = Clusters.BFSComponents(G)
     print("Got clusters") 
-    GraphVisualisation.showComponentGraph(G, components)
+    GraphVisualisation.showComponentGraph(components)
     GraphVisualisation.showGraph(G, components, "Small example")
     coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
     
@@ -27,22 +27,10 @@ def main(G):
     print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
 
 
-#main(SmallExamples.buildGraph())
-
+"""main(SmallExamples.buildGraph())
+print("Main is done for small graph.")
+"""
 import GenerateBigNets
 
-G = GenerateBigNets.bigGraph(100)
-GraphVisualisation.showGraph(G)
-
-print("Main is done.")
-
-"""
-import networkx as nx
-edges, edgeColors = zip(*nx.get_edge_attributes(G, 'color').items())
-for (e, eC) in zip(edges, edgeColors):
-    print(e, eC)"""
-
-edges = G.edges()
-colors = [G[u][v]['color'] for u,v in edges]
-for e, c in zip(edges, colors):
-    print(e, c)
+for x in [5, 10, 30, 50, 100]:
+    main(GenerateBigNets.bigGraph(x))
