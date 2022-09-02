@@ -44,9 +44,9 @@ Metrics.drawCCDegreeDistribution(G)"""
 print("Main is done for small graph.")
 """
 
-#for x, clusterable in zip([30, 65, 1000, 10], [False, True, False, False]):
-for x in [4000, 8000, 15000, 100000]:
-    Graph = GenerateBigNets.bigGraph(x)
-    #testGraph(Graph)
+for x, clusterable in zip([30, 65, 1000, 10], [False, True, False, False]):
+#clusterable = True; for x in [4000, 8000, 15000, 100000]:
+    Graph = GenerateBigNets.bigGraph(x, clusterable)
+    testGraph(Graph)
     Degrees.drawCCDegreeDistribution(Graph, True)   
     Asortativity.drawKNNandDeg(Graph)

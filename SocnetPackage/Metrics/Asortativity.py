@@ -12,7 +12,7 @@ def generalizedIndexAsortativity(G, propertyX, propertyY, modified = False):
         u, v = propertyX(e[0]), propertyY(e[1])
         x.append(u, v); y.append(v, u)
     
-    return Correlations.pearsonCorrelation(x, y) if not modified else Correlations.spearmanCorrelation(x, y)
+    return pearsonCorrelation(x, y) if not modified else spearmanCorrelation(x, y)
 
 #KNN
 def avg(array): 
