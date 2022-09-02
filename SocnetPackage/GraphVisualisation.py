@@ -19,9 +19,10 @@ def showComponentNames(pos, components):
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
-def showGraph(G, components = [], graphname = "graph", AX = None):
+def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None):
     graphname += ".dot"
-    
+    if withLabels == None:
+        withLabels = type(list(G.nodes)[0])==str
     """
     edge_labels = nx.get_edge_attributes(G,'color')
     print(edge_labels)
@@ -38,7 +39,11 @@ def showGraph(G, components = [], graphname = "graph", AX = None):
         
     else: edgeColors = ["black"]; weights = [1.5]; 
     
-    nodeColors = [G.nodes[n]["color"] for n in G.nodes]
+    ndAt = nx.get_node_attributes(G, 'color')
+    if ndAt:
+        nodeColors = [G.nodes[n]["color"] for n in G.nodes]
+    else:
+        nodeColors = ["blue"]
     
     pos = nx.kamada_kawai_layout(G)
     showComponentNames(pos, components)
@@ -51,7 +56,7 @@ def showGraph(G, components = [], graphname = "graph", AX = None):
         ###from PIL import Image; Image.open('somefile.png').show()
         ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
     #else:
-    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=type(list(G.nodes)[0])==str, font_color='white', ax = AX)
+    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=withLabels, font_color='white', ax = AX)
     #nx.draw(G, pos)
     if AX == None:
         plt.show()
