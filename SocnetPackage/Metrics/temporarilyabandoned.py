@@ -62,3 +62,44 @@ G.add_edge(2, 9, color="red")
     
 print(KNN(G, 2, [5,4,8,7,3,9,1]))
 
+###Deprecated stuff from main_old, hopefully soon remove
+def testGraph(G):
+    components = Clusters.BFSComponents(G)
+    print("Got clusters") 
+    #GraphVisualisation.showComponentGraph(components)
+    #GraphVisualisation.showGraph(G, components, "Small example")
+    coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
+    
+    """print("Following components: ")
+    for c in components:
+        print(c.nodes, c.edges)"""
+    
+    
+    
+    G2 = GraphOfClusters.create(G)
+    #GraphVisualisation.showGraph(G2, graphname="Components graph")
+    #print("Graph of clusters: {} {}".format(G2.nodes, G2.edges))
+
+    
+
+    Degrees.drawCCDegreeDistribution(G, True)   
+    Asortativity.drawKNNandDeg(Graph)
+    #print(Degrees.printMetrics(Graph))
+
+    
+"""G = SmallExamples.buildGraph()
+#print(G.degree, "\n", G.edges)
+Metrics.drawDegreeDistribution(G)
+Metrics.drawCCDegreeDistribution(G)"""
+
+#GraphVisualisation.showGraph(G, withLabels=True)
+"""main(SmallExamples.buildGraph())
+print("Main is done for small graph.")
+"""
+"""
+for x, clusterable in zip([30, 65, 1000, 10], [False, True, False, False]):
+#clusterable = True; for x in [4000, 8000, 15000, 100000]:
+    Graph = GenerateBigNets.bigGraph(x, clusterable)
+    testGraph(Graph)"""
+    
+    
