@@ -35,18 +35,18 @@ def allKNN(G):
 
 #Draw
 def drawKNNandDeg(G = nx.Graph()):
-    fig, ax = plt.subplots(1, 2)
-    fig.tight_layout()
-    drawKNN(G, ax[0])
-    drawDegDeg(G, ax[1])
+    fig, ax = plt.subplots(1, 2, constrained_layout = True)
+    #fig.tight_layout()
+    ylim = drawDegDeg(G, ax[1])
+    drawKNN(G, ax[0], ylim)
     plt.locator_params(axis="x", integer=True)
     plt.suptitle(G)
     plt.show()
 
-def drawKNN(G, ax):
+def drawKNN(G, ax, ylim):
     x, y = allKNN(G)
 
-    ax.set(xlabel = "k degree nodes", ylabel="Degree of their neighborhood", title="Asortativity (KNN)" + correlData(x, y))
+    ax.set(xlabel = "k degree nodes", ylabel="Degree of their neighborhood", title="Asortativity (KNN)" + correlData(x, y), ylim = ylim)
     ax.scatter(x, y)
 
 def drawDegDeg(G, ax):
@@ -64,6 +64,6 @@ def drawDegDeg(G, ax):
 
     ax.set(xlabel = "degree of node", ylabel="degree of neighbor", title="Asortativity (deg-deg)" + correlData(x, y))
     ax.scatter(x, y)
-
+    return ax.get_ylim()
 
     

@@ -87,7 +87,7 @@ def showComponentGraph(components):
 
 def showGraphAndComponents(G, components, G2, ttl):
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    ax1.set_title(ttl[1]); ax2.set_title(ttl[2]);
+    ax1.set_title(ttl[1]); ax2.set_title(ttl[2])
     fig.suptitle(ttl[0])
     showGraph(G2, AX = ax1)
     showGraph(G, components, AX = ax2)

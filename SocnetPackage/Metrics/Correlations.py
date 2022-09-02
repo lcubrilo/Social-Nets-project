@@ -13,11 +13,13 @@ def pearsonCorrelation(x, y):
     return numerator/(denominator1*denominator2)         
 
 def spearmanCorrelation(x, y):
-    return pearsonCorrelation(valuesToRank(x), valuesToRank(y))
+    adjustedx, djustedy = valuesToRank(x), valuesToRank(y)
+    return pearsonCorrelation(adjustedx, djustedy)
 
 def valuesToRank(values):
-    if len(list(values)) == len(set(values)):
-        return values
+    #if len(list(values)) == len(set(values)):
+    #    print("weird problem")
+    #    return values
     ranks = sorted(values)
     tmpSum = 0; length = 1
     
@@ -32,4 +34,4 @@ def valuesToRank(values):
 
 def correlData(x, y):
     a, b = pearsonCorrelation(x, y), spearmanCorrelation(x, y)
-    return " pearson={} spearman={}".format(round(a, 2), round(b, 2))
+    return " (pearson={} spearman={})".format(round(a, 2), round(b, 2))
