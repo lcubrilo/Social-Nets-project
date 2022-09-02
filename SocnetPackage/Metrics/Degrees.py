@@ -1,3 +1,5 @@
+from re import L
+import networkx as nx
 import matplotlib.pyplot as plt
 from math import log10
 from .Correlations import correlData
@@ -88,7 +90,44 @@ def drawCCDegreeDistribution(G, testPowerExponential = False):
         ax[1,1].set(xlabel = "log node degree", ylabel = "log CCDF", title="If linear: power law distribution" + correlData(x, y))
         ax[1,1].plot(x,y)
 
+    plt.suptitle("{}; Average degree: {}, Net density: {}\n".format(
+        G, round(averageNodeDegree(G), 2), round(netDensity(G), 2)))
+
+
     plt.show()
+
+
+def sMetric(G):
+    return sum([G.degree(u)*G.degree(v) for (u, v) in G.edges])   
+
+#Paths based metrics
+def printMetrics(G):
+    return "S metric: {}, Small world: {}, Net efficiency: {}, Diameter: {}, Radius: {}".format(
+        round(sMetric(G), 2),
+        round(smallWorldCoefficitent(G), 2),
+        round(netEfficiency(G), 2),
+        round(diameter(G), 2),
+        round(radius(G), 2)
+    )
+
+def smallWorldCoefficitent(G):
+    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
+    return sum([d[i][j] for i in range(n) for j in range(n) if i != j])/(n*n-n)
+
+def netEfficiency(G):
+    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
+    return sum([1/d[i][j] for i in range(n) for j in range(n) if i != j])/(n*n-n)
+
+def eccentricities(G):
+    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
+    return [max([d[i][j] for j in range(n)]) for i in range(n)]
+
+def diameter(G):
+    return max(eccentricities(G))
+
+def radius(G):
+    return min(eccentricities(G))
+
 
 
 def avg(array): 
