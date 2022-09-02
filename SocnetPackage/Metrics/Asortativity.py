@@ -53,7 +53,10 @@ def drawDegDeg(G, ax):
     x, y = [], []
 
     for e in G.edges:
-        u, v = e
+        if len(e) == 3:
+            u, v, bukvalnostajeovatrecavarijabla = e
+        elif len(e) == 2:
+            u, v = e
         u, v = G.degree(u), G.degree(v)
         x.append(u); y.append(v)
         x.append(v); y.append(u)
