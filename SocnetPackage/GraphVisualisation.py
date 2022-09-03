@@ -20,6 +20,8 @@ def showComponentNames(pos, components):
     else: showComponentName(pos, components)
 
 def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None, fontColor = "white"):
+    from time import time
+    start = time()
     graphname += ".dot"
     if withLabels == None:
         withLabels = type(list(G.nodes)[0])==str
@@ -60,6 +62,8 @@ def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = N
     #nx.draw(G, pos)
     if AX == None:
         plt.show()
+    
+    #print(time()-start, G)
 
 import math
 def showComponentGraph(components):
@@ -93,3 +97,15 @@ def showGraphAndComponents(G, components, G2, ttl):
     showGraph(G, components, AX = ax2)
     
     plt.show()
+
+def showGraphs(graphs):
+    n = len(graphs)
+    matrixSize = math.ceil(math.sqrt(n))
+
+    fig, ax = plt.subplots(n,n)
+    for i in range(matrixSize):
+        for j in range(matrixSize):
+            graphIndex = i*matrixSize + j
+            if graphIndex == n:
+                plt.show(); return
+            showGraph(graphs[graphIndex], ax[i][j])

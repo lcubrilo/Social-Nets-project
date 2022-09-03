@@ -1,5 +1,12 @@
-import AcquireGraphs, Tasks
+import Tasks
+from SocnetPackage.DataGeneration import SmallExamples, GenerateBigNets, LoadRealNets
 
-graphs = AcquireGraphs.acquireGraphs()
-for graph in graphs:
+Tasks.assignGraphsToTasks(LoadRealNets.getNet("epinions")); 
+"""
+
+
+for graph in [LoadRealNets.getNet(netName) for netName in ["wiki", "epinions"]]:
     Tasks.assignGraphsToTasks(graph)
+
+    LoadRealNets.getNet("wiki")
+    """

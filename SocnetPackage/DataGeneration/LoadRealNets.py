@@ -59,19 +59,37 @@ def loadWiki(limiter = -1):
             elif tag == "VOT":
                 if G.has_edge(u, v):
                     if G.edges[u, v]["color"] == "red": continue
-                    else: G.add_edge(u, v, color = "red" if data == "-1" else "green")
-                else: 
-                    G.add_edge(u, v, color = "red" if data == "-1" else "green")
+                G.add_edge(u, v, color = "red" if data == "-1" else "green")
             else: continue
 
             i+=1
             if limiter != -1 and i > limiter: 
                 break
             #print(line)
-    graphToTxt(G, "SocnetPackage\DataGeneration\wiki-RfA-simpler.txt")
+    
+    graphToTxt(G, fastLoader["wiki"][1])
     return G  
-def loadEpinions():
-    return
+def loadEpinions(limiter = -1):
+    G = nx.Graph(); i = 0
+                        
+    with open(r"SocnetPackage\DataGeneration\soc-sign-epinions.txt", 'r', encoding="utf8") as f:
+        users = {}
+        for line in f:
+            if line[0] == "#": continue
+            u, v, sign = line.split("	") 
+            u, v, color = int(u), int(v), "red" if sign == "-1" else "green"
+
+            if G.has_edge(u, v):
+                if G.edges[u, v]["color"] == "red": continue
+            G.add_edge(u, v, color = color)
+
+            i+=1
+            if limiter != -1 and i > limiter: 
+                break
+            #print(line)
+    
+    graphToTxt(G, fastLoader["epinions"][1])
+    return G 
 def loadSlashdot():
     return
 
@@ -79,7 +97,7 @@ def getNet(name):
     (loadFunc, path) = fastLoader[name]
     G = txtToGraph(path)
     if G == False:
-        return loadFunc(1000)
+        return loadFunc() #TODO: change
     else:
         return G
 
@@ -93,23 +111,25 @@ def graphToTxt(G, path = "SocnetPackage\DataGeneration"):
     if path == "SocnetPackage\DataGeneration":
         path += "\exported.txt"
     with open(path, 'w+', encoding="utf8") as f:
-        f.write(str(G)+"\n")
+        f.write("#{}\n".format(str(G)))
         for edge in G.edges:
             f.write(str(edge)[1:-1]+", {}\n".format(G.edges[edge]["color"]))
         return True
     return False
 
 def txtToGraph(path = "SocnetPackage\DataGeneration\exported.txt"):
-    G = nx.Graph()
-    with open(path, "r", encoding="utf8") as f:
-        f.readline()
-        for line in f:
-            [u, v, color] = line[:-1].split(", ")
-            G.add_edge(int(u), int(v), color = color)
-        return G
-    return False
+    try:  
+        G = nx.Graph()
+        with open(path, "r", encoding="utf8") as f:
+            for line in f:
+                if line[0] == "#": continue
+                [u, v, color] = line[:-1].split(", ")
+                G.add_edge(int(u), int(v), color = color)
+            return G
+    except:
+        return False
 
-from time import sleep, time
+from time import time
 
 start, timeAtFreeze= time(), 0
 def printDuration(operationName = ""):

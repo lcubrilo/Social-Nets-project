@@ -45,7 +45,7 @@ def assignGraphsToTasks(G):
 
     #Secondly, do thing_1 and thing_2 (they recquire less visualizations - only 2 subplots)
     ttls = getTitles(G, len(components), len(coalitions), len(problemEdges) == 0)
-    GraphVisualisation.showGraphAndComponents(G , components, G2, ttls)
+    GraphVisualisation.showGraph(G2)
     showMetrics(G); showMetrics(G2)
 
     #TODO: Finally do the thing_3 (each of the components) - here we visualize n×n subplots
