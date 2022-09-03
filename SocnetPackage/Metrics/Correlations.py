@@ -1,7 +1,7 @@
 def pearsonCorrelation(x, y):
     x_len = len(x); x_sum = sum(x); x_avg = x_sum/x_len
     y_len = len(y); y_sum = sum(y); y_avg = y_sum/y_len
-
+    
     x_delta = [x_i - x_avg for x_i in x]
     y_delta = [y_i - y_avg for y_i in y]
 
@@ -10,6 +10,8 @@ def pearsonCorrelation(x, y):
         numerator += dx*dy
         denominator1 += dx**2; denominator2 += dy**2
     
+    if denominator1 == 0 or denominator2==0: return -2
+
     return numerator/(denominator1*denominator2)         
 
 def spearmanCorrelation(x, y):

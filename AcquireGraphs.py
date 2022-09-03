@@ -1,2 +1,4 @@
-from DataGeneration import SmallExamples, GenerateBigNets, LoadRealNets
+from SocnetPackage.DataGeneration import SmallExamples, GenerateBigNets, LoadRealNets
 
+def acquireGraphs():
+    return [LoadRealNets.getNet("wiki")]

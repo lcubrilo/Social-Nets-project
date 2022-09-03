@@ -21,7 +21,7 @@ def bigGraph(numOfNodes, clusterable = True):
     
     """for c in components:
         print(c.nodes)
-"""
+    """
     
     #GraphVisualisation.showComponentGraph(components)
     graphOfComponents = generateGraphOfComponents(components)

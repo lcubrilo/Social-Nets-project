@@ -1,6 +1,5 @@
-from AcquireGraphs import *
-from Tasks import assignGraphsToTasks
+import AcquireGraphs, Tasks
 
-graphs = AcquireGraphs()
+graphs = AcquireGraphs.acquireGraphs()
 for graph in graphs:
-    Tasks.assignGraphsToTasks
+    Tasks.assignGraphsToTasks(graph)

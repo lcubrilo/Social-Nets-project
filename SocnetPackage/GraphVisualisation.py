@@ -19,7 +19,7 @@ def showComponentNames(pos, components):
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
-def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None):
+def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None, fontColor = "white"):
     graphname += ".dot"
     if withLabels == None:
         withLabels = type(list(G.nodes)[0])==str
@@ -56,7 +56,7 @@ def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = N
         ###from PIL import Image; Image.open('somefile.png').show()
         ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
     #else:
-    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=withLabels, font_color='white', ax = AX)
+    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=withLabels, font_color=fontColor, ax = AX)
     #nx.draw(G, pos)
     if AX == None:
         plt.show()

@@ -112,15 +112,15 @@ def printMetrics(G):
 
 def smallWorldCoefficitent(G):
     n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    return sum([d[i][j] for i in range(n) for j in range(n) if i != j])/(n*n-n)
+    return sum([d[u][v] for u in G.nodes for v in G.nodes if u != v])/(n*n-n)
 
 def netEfficiency(G):
     n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    return sum([1/d[i][j] for i in range(n) for j in range(n) if i != j])/(n*n-n)
+    return sum([1/d[u][v] for u in G.nodes for v in G.nodes if u != v])/(n*n-n)
 
 def eccentricities(G):
     n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    return [max([d[i][j] for j in range(n)]) for i in range(n)]
+    return [max([d[u][v] for u in G.nodes for v in G.nodes])]
 
 def diameter(G):
     return max(eccentricities(G))
