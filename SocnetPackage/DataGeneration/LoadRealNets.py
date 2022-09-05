@@ -1,48 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None, fontColor = "white"):
-    graphname += ".dot"
-    if withLabels == None:
-        withLabels = type(list(G.nodes)[0])==str
-    """
-    edge_labels = nx.get_edge_attributes(G,'color')
-    print(edge_labels)
-    nx.draw_networkx_edge_labels(G, pos, edge_labels)"""
-
-    edAt = nx.get_edge_attributes(G, 'color')
-    if edAt :
-        edges, edgeColors = zip(*edAt.items())
-        weights = []
-        for e, eC in zip(edges, edgeColors):
-            weight_val = 1 if eC == "green" else 3
-            G.add_edge(e[0], e[1], weight = weight_val/0.5)
-            weights.append(3/weight_val)
-        
-    else: edgeColors = ["black"]; weights = [1.5]; 
-    
-    ndAt = nx.get_node_attributes(G, 'color')
-    if ndAt:
-        nodeColors = [G.nodes[n]["color"] for n in G.nodes]
-    else:
-        nodeColors = ["blue"]
-    
-    pos = nx.kamada_kawai_layout(G)
-    #showComponentNames(pos, components)
-    """ from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
-    import os; Thread(target=lambda: os.startfile(graphname)).start()"""
-
-    #if type(G) == type(nx.MultiGraph()):
-        
-        ##import pydot; (graph,) = pydot.graph_from_dot_file('multi.dot'); graph.write_png('somefile.png')
-        ###from PIL import Image; Image.open('somefile.png').show()
-        ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
-    #else:
-    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=withLabels, font_color=fontColor, ax = AX)
-    #nx.draw(G, pos)
-    if AX == None:
-        plt.show()
-
 def loadWiki(limiter = -1):
     G = nx.Graph(); i = 0
                         
@@ -106,6 +64,7 @@ fastLoader = {
     "epinions": (loadEpinions, "SocnetPackage\DataGeneration\soc-sign-epinions-simpler.txt"),
     "slashdot": (loadSlashdot, "SocnetPackage\DataGeneration\soc-sign-Slashdot090221-simpler.txt")
 }
+def getNames(): return [name for name in fastLoader]
 
 def graphToTxt(G, path = "SocnetPackage\DataGeneration"):
     if path == "SocnetPackage\DataGeneration":
@@ -154,3 +113,45 @@ def unfreezeTime():
         start += time() - timeAtFreeze
         timeAtFreeze = 0
 
+
+def showGraph(G, components = [], graphname = "graph", AX = None, withLabels = None, fontColor = "white"):
+    graphname += ".dot"
+    if withLabels == None:
+        withLabels = type(list(G.nodes)[0])==str
+    """
+    edge_labels = nx.get_edge_attributes(G,'color')
+    print(edge_labels)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels)"""
+
+    edAt = nx.get_edge_attributes(G, 'color')
+    if edAt :
+        edges, edgeColors = zip(*edAt.items())
+        weights = []
+        for e, eC in zip(edges, edgeColors):
+            weight_val = 1 if eC == "green" else 3
+            G.add_edge(e[0], e[1], weight = weight_val/0.5)
+            weights.append(3/weight_val)
+        
+    else: edgeColors = ["black"]; weights = [1.5]; 
+    
+    ndAt = nx.get_node_attributes(G, 'color')
+    if ndAt:
+        nodeColors = [G.nodes[n]["color"] for n in G.nodes]
+    else:
+        nodeColors = ["blue"]
+    
+    pos = nx.kamada_kawai_layout(G)
+    #showComponentNames(pos, components)
+    """ from networkx.drawing.nx_agraph import write_dot; write_dot(G,graphname)
+    import os; Thread(target=lambda: os.startfile(graphname)).start()"""
+
+    #if type(G) == type(nx.MultiGraph()):
+        
+        ##import pydot; (graph,) = pydot.graph_from_dot_file('multi.dot'); graph.write_png('somefile.png')
+        ###from PIL import Image; Image.open('somefile.png').show()
+        ####nx.draw(G, pos, edge_color=edgeColors, width=2, with_labels=True, connectionstyle="arc3,rad=0.3")
+    #else:
+    nx.draw(G, pos, edge_color=edgeColors, width=weights, node_color=nodeColors, with_labels=withLabels, font_color=fontColor, ax = AX)
+    #nx.draw(G, pos)
+    if AX == None:
+        plt.show()

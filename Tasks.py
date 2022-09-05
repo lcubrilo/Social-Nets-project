@@ -37,18 +37,23 @@ def getTitles(G, numComp, numCoal, areWeClusterable):
 #   2. the graph of components
 
 def assignGraphsToTasks(G):
-    #Firstly, derive those three things:
+    #1. Original graph 
+    #GraphVisualization.showGraph(G)
+    showMetrics(G)
+
+    #3. Each of the components
     components = Clusters.BFSComponents(G)
     coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
     #printClusters(coalitions, noncoalitions)
     G2 = GraphOfClusters.create(G)
 
-    #Secondly, do thing_1 and thing_2 (they recquire less visualizations - only 2 subplots)
-    ttls = getTitles(G, len(components), len(coalitions), len(problemEdges) == 0)
+    #2. Graph of components
     GraphVisualisation.showGraph(G2)
-    showMetrics(G); showMetrics(G2)
+    showMetrics(G2)
 
-    #TODO: Finally do the thing_3 (each of the components) - here we visualize n×n subplots
+    #Show a sample of components
+    GraphVisualisation.showGraphs(coalitions)
+    GraphVisualisation.showGraphs(noncoalitions)
     """
     for graph in coalitions:
         showMetrics(graph)
