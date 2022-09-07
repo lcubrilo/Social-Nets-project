@@ -20,7 +20,7 @@ def showComponentNames(pos, components):
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
-def showGraph(G, components = [], title = "", AX = None, withLabels = None, fontColor = "white"):
+def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True):
     from time import time
     start = time()
     if title == "": title = str(G)
@@ -35,20 +35,30 @@ def showGraph(G, components = [], title = "", AX = None, withLabels = None, font
                 G.add_edge(e[0], e[1], weight = weight_val/0.5)
                 edgeWeights.append(3/weight_val)
             
-        else: edgeColors = ["black"]; weights = [1.5]; 
+        else: edgeColors = ["black"]; edgeWeights = [1.5]; 
         return edgeColors, edgeWeights
-    def nodeColors():
-        ndAt = nx.get_node_attributes(G, 'color')
-        if ndAt:
-            nodeColors = [G.nodes[n]["color"] for n in G.nodes]
-        else:
-            nodeColors = ["blue"]
-            return nodeColors()
-    edgeColors, edgeWeights, nodeColors = getEdgeColorsWeights(), nodeColors()
+    def getNodeColors():
+        if nx.get_node_attributes(G, 'color'):
+            return [G.nodes[n]["color"] for n in G.nodes]
+        else: return ["blue"]
+        
+    edgeColors, edgeWeights = getEdgeColorsWeights()
+    nodeColors = getNodeColors()
 
     pos = nx.kamada_kawai_layout(G)
-    showComponentNames(pos, components)
-    nx.draw(G, pos, edge_color=edgeColors, width=edgeWeights, node_color=nodeColors, with_labels=withLabels, font_color=fontColor, title=title, ax = AX)
+    if showComponents: showComponentNames(pos, components)
+
+    if AX != None: AX.set_title(title)
+    else: plt.title(title)
+
+    nx.draw(G, 
+        pos,
+        edge_color=edgeColors,
+        width=edgeWeights,
+        node_color=nodeColors,
+        with_labels=withLabels,
+        font_color=fontColor,
+        ax = AX)
     
     if AX == None:plt.show()
     #print(time()-start, G)
@@ -86,15 +96,21 @@ def showGraphAndComponents(G, components, G2, ttl):
     
     plt.show()
 
-def showGraphs(Graphs):
-    n = min(36, len(Graphs))
+def showGraphs(Graphs, title, maxSize = 4):
+    n = min(maxSize**2, len(Graphs))
+    if n == 0: return
+    if n == 1: showGraph(Graphs[0], title=title); return
     matrixSize = math.ceil(math.sqrt(n))
 
-    graphs = sample(Graphs, 36) if n == 36  else Graphs
-
-    fig, ax = plt.subplots(n,n)
+    graphs = sample(Graphs, maxSize**2) if n > maxSize**2  else Graphs
+    subtitle = "Coalition " if title[0] == "C" else "Noncoalition " 
+    fig, ax = plt.subplots(matrixSize, matrixSize)
     for i in range(matrixSize):
         for j in range(matrixSize):
-            showGraph(graphs[i*matrixSize + j], ax[i][j])
-
+            graphIndex = i*matrixSize + j
+            if graphIndex == n-1 or graphIndex == maxSize**2-1: break
+            graph = graphs[graphIndex]
+            showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
+    
+    fig.suptitle(title)
     plt.show()

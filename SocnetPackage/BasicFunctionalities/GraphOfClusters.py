@@ -1,7 +1,7 @@
 import networkx as nx
 
 def create(G):
-    result = nx.MultiGraph()
+    result = nx.Graph()#nx.MultiGraph() #TODO reconsider
 
     for node in G.nodes: 
         tmpComponent = G.nodes[node]["component"]

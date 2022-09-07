@@ -32,24 +32,24 @@ def allKNN(G):
         KNN_values.append(KNN(G, degree, group))
     
     return k_values, KNN_values
-
+"""
 #Draw
-def drawKNNandDeg(G = nx.Graph()):
+def drawKNNandDeg(G = nx.Graph(), graphName = ""):
     fig, ax = plt.subplots(1, 2, constrained_layout = True)
     #fig.tight_layout()
-    ylim = drawDegDeg(G, ax[1])
-    drawKNN(G, ax[0], ylim)
+    drawDegDeg(G, ax[1])
+    drawKNN(G, ax[0])
     plt.locator_params(axis="x", integer=True)
-    plt.suptitle(G)
+    plt.suptitle("{} {}".format(graphName, G))
     plt.show()
 
-def drawKNN(G, ax, ylim):
+def drawKNN(G, ax):
     x, y = allKNN(G)
 
-    ax.set(xlabel = "k degree nodes", ylabel="Degree of their neighborhood", title="Asortativity (KNN)" + correlData(x, y), ylim = ylim)
+    ax.set(xlabel = "k degree nodes", ylabel="Degree of their neighborhood", title="Asortativity (KNN)" + correlData(x, y))
     ax.scatter(x, y)
 
-def drawDegDeg(G, ax):
+def drawDegDeg2(G, ax):
     x, y = [], []
 
     for e in G.edges:
@@ -64,6 +64,6 @@ def drawDegDeg(G, ax):
 
     ax.set(xlabel = "degree of node", ylabel="degree of neighbor", title="Asortativity (deg-deg)" + correlData(x, y))
     ax.scatter(x, y)
-    return ax.get_ylim()
 
-    
+def drawDegDeg(G, ax):
+    groupedByDegree = groupNodesByDegree(G)"""

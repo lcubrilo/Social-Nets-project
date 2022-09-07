@@ -16,14 +16,14 @@ def netDensity(G):
 
     return l/maxL
 
-def degreeOfNeighborhoodOf(G, x): #neighborhood net density
+def degreeOfNeighborhoodOf(G, x):
     res = []
     for node in G.neighbors(x):
         res.append(G.degree(node))
-    return avg(res)
+    return avg(res) if res != [] else 0
 
-#Knn
-def groupNodesByDegree(G): #defunct
+#X AXIS IN ALL DISTRIBUTIONS
+def groupNodesByDegree(G):
     degreePairs = sorted(G.degree, key= lambda element:element[1])
 
     firstNode, itsDegree = degreePairs[0]
@@ -63,93 +63,51 @@ def drawDegreeDistribution(G, thisIsSubplot=False, debug=False):
         fig, ax = plt.subplots(2, 2, constrained_layout = True)
         #fig.tight_layout()
         ax[0,0].set(xlabel = "Node degree", ylabel="Frequency", title="Degree distribution " + correlData(x_axis, y_axis))
-        ax[0,0].plot(x_axis, normalizedDegreeDistribution)
+        ax[0,0].scatter(x_axis, normalizedDegreeDistribution)
         return ax, x_axis, normalizedDegreeDistribution
     else:
         plt.xlabel("Node degree")
         plt.ylabel("Frequency")
         plt.title("Degree distribution" + correlData)
-        plt.plot(x_axis, normalizedDegreeDistribution)
+        plt.scatter(x_axis, normalizedDegreeDistribution)
         plt.suptitle(G)
         plt.show()
 
-def drawCCDegreeDistribution(G, testPowerExponential = False):
+def removeZeros(x, y):
+        x=list(x); y=list(y)
+        try:
+            while True:
+                index = x.index(0)
+                x = x[:index] + x[index+1:]
+                y = y[:index] + y[index+1:]
+        except:
+            return x, y
+
+def drawCCDegreeDistribution(G, testPowerExponential = False, graphName = ""):
     ax, x, y = drawDegreeDistribution(G, thisIsSubplot=True)
     for i in reversed(range(1, len(y))):
         y[i-1] += y[i]
     
     ax[0,1].set(xlabel = "node degree", ylabel="CCD frequency", title="Complementary cumulative" + correlData(x, y))
-    ax[0,1].plot(x, y)
+    ax[0,1].scatter(x, y)
 
     if testPowerExponential:
+        y, x = removeZeros(y,x)
+
         y = [log10(e) for e in y]
         ax[1,0].set(xlabel = "node degree", ylabel = "log CCDF", title="If linear: exponential distribution" + correlData(x, y))
-        ax[1,0].plot(x,y)
+        ax[1,0].scatter(x,y)
 
-        x = [log10(e) for e in x]
+        x, y = removeZeros(x,y)
+        x = [log10(e) for e in x if e!=0]
         ax[1,1].set(xlabel = "log node degree", ylabel = "log CCDF", title="If linear: power law distribution" + correlData(x, y))
-        ax[1,1].plot(x,y)
+        ax[1,1].scatter(x,y)
 
-    plt.suptitle("{}; Average degree: {}, Net density: {}\n".format(
-        G, round(averageNodeDegree(G), 2), round(netDensity(G), 2)))
+    plt.suptitle(graphName + "{}\nAverage degree: {}, Net density: {}%\n".format(
+        G, round(averageNodeDegree(G), 3), round(100*netDensity(G), 3)))
 
 
     plt.show()
-
-
-def sMetric(G):
-    return sum([G.degree(u)*G.degree(v) for (u, v) in G.edges])   
-
-#Paths based metrics
-def printMetrics(G):
-    return "S metric: {}, Small world: {}, Net efficiency: {}, Diameter: {}, Radius: {}".format(
-        round(sMetric(G), 2),
-        round(smallWorldCoefficitent(G), 2),
-        round(netEfficiency(G), 2),
-        round(diameter(G), 2),
-        round(radius(G), 2)
-    )
-
-def smallWorldCoefficitent(G):
-    #if len(G.edges > 6000):
-        #return "Nah"
-    summa = 0
-    for line in nx.all_pairs_shortest_path_length(G):
-        for v in line[1]:
-            summa += line[1][v]
-    return summa/(len(G.nodes)**2 - len(G.nodes))
-    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    sum([d[u][v] for u in G.nodes for v in G.nodes if u != v])/(n*n-n)
-
-def netEfficiency(G):
-    summa = 0
-    for line in nx.all_pairs_shortest_path_length(G):
-        for v in line[1]:
-            if v != line[0]:
-                summa += 1/line[1][v]
-    return summa/(len(G.nodes)**2 - len(G.nodes))
-    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    return sum([1/d[u][v] for u in G.nodes for v in G.nodes if u != v])/(n*n-n)
-
-def eccentricities(G):
-    res = []
-    for line in nx.all_pairs_shortest_path_length(G):
-        max = 0
-        for v in line[1]:
-            if line[1][v] > max: 
-                max = line[1][v]
-        res.append(max)
-    return res
-    return summa/(len(G.nodes)**2 - len(G.nodes))
-    n = len(G.nodes); d = dict(nx.all_pairs_shortest_path_length(G))
-    return [max([d[u][v] for u in G.nodes for v in G.nodes])]
-
-def diameter(G):
-    return max(eccentricities(G))
-
-def radius(G):
-    return min(eccentricities(G))
-
 
 
 def avg(array): 

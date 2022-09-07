@@ -48,8 +48,34 @@ def loadEpinions(limiter = -1):
     
     graphToTxt(G, fastLoader["epinions"][1])
     return G 
-def loadSlashdot():
-    return
+def loadSlashdot(limiter = - 1):
+    G = nx.Graph(); i = 0
+                        
+    with open(r"SocnetPackage\DataGeneration\soc-sign-Slashdot090221.txt", 'r', encoding="utf8") as f:
+        users = {}
+        for line in f:
+            if line[0] == "#": continue
+            u, v, sign = line.split("	") 
+            u, v, color = int(u), int(v), "red" if sign == "-1" else "green"
+
+            if G.has_edge(u, v):
+                if G.edges[u, v]["color"] == "red": continue
+            G.add_edge(u, v, color = color)
+
+            i+=1
+            if limiter != -1 and i > limiter: 
+                break
+            #print(line)
+    
+    graphToTxt(G, fastLoader["slashdot"][1])
+    return G 
+
+fastLoader = {
+    "wiki": (loadWiki, "SocnetPackage\DataGeneration\wiki-RfA-simpler.txt"),
+    "epinions": (loadEpinions, "SocnetPackage\DataGeneration\soc-sign-epinions-simpler.txt"),
+    "slashdot": (loadSlashdot, "SocnetPackage\DataGeneration\soc-sign-Slashdot090221-simpler.txt")
+}
+def getNames(): return [name for name in fastLoader]
 
 def getNet(name):
     (loadFunc, path) = fastLoader[name]
@@ -59,12 +85,6 @@ def getNet(name):
     else:
         return G
 
-fastLoader = {
-    "wiki": (loadWiki, "SocnetPackage\DataGeneration\wiki-RfA-simpler.txt"),
-    "epinions": (loadEpinions, "SocnetPackage\DataGeneration\soc-sign-epinions-simpler.txt"),
-    "slashdot": (loadSlashdot, "SocnetPackage\DataGeneration\soc-sign-Slashdot090221-simpler.txt")
-}
-def getNames(): return [name for name in fastLoader]
 
 def graphToTxt(G, path = "SocnetPackage\DataGeneration"):
     if path == "SocnetPackage\DataGeneration":

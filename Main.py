@@ -2,30 +2,42 @@ from Tasks import assignGraphsToTasks
 from SocnetPackage.DataGeneration import SmallExamples, GenerateBigNets, LoadRealNets
 
 #Let's get nets
-allNets = []
+allNets = {}
 
 testCategories = []
 
-#testCategories.append("small")
+testCategories.append("small")
 #testCategories.append("big")
 testCategories.append("real")
 
 
 if "small" in testCategories:
     #Only one
-    print("Testing small handcrafted examples: ")
-    allNets  += [SmallExamples.buildGraph()]; 
+    print("Will test small handcrafted examples: ")
+    allNets["small"] = SmallExamples.buildGraph()
 
 if "big" in testCategories:
     examplePairs = zip([500, 120, 1000, 300], [False, True, False, True])
-    print("Testing the following big random nets [nodeCount, clusterable]:", examplePairs)
-    allNets += [GenerateBigNets.bigNet(nodeCount, clusterable) for nodeCount, clusterable in examplePairs]
+    print("Will test the following big random nets [nodeCount, clusterable]:", examplePairs)
+    for i, (nodeCount, clusterable) in enumerate(examplePairs):
+        allNets["big{}".format(i)] = GenerateBigNets.bigNet(nodeCount, clusterable)
 
 if "real" in testCategories:
-    realNets = ["wiki"]#LoadRealNets.getNames()
+    realNets = ["wiki", "epinions", "slashdot"]#LoadRealNets.getNames()
     
-    print("Testing real nets [netName]:", realNets)
-    allNets += [LoadRealNets.getNet(netName) for netName in realNets]
+    print("Will test real nets [netName]:", realNets)
+    for netName in realNets:
+        allNets[netName] = LoadRealNets.getNet(netName) 
 
-for graph in allNets:
-    assignGraphsToTasks(graph)
+import papermill as pm
+
+for graphName in allNets:
+    #print("\tTesting " + graphName)
+    #assignGraphsToTasks(, graphName)
+    pm.execute_notebook(
+        'Layout3.ipynb',
+        '{}.ipynb'.format(graphName),
+        parameters=dict(G=allNets[graphName])
+    )
+
+

@@ -5,7 +5,7 @@ from ..ComponentNamesColors import iterateThruComponentNames
 from math import log, ceil
 #import GraphVisualisation
 
-def bigGraph(numOfNodes, clusterable = True):
+def bigNet(numOfNodes, clusterable = True):
     nodesMade = 0
     components = []
     currCompName = "A"   
@@ -59,19 +59,19 @@ def graphOfComponents2BigGraph(g, components):
     for c in components:
         BigGraph.add_edges_from(c.edges, color="green")
 
-    print("Converting it to big graph")
+    #print("Converting it to big graph")
     for edge in g.edges:
         c1, c2 = edge[0], edge[1]
         connect2Components(BigGraph, c1, c2, int(random()*4)+1)
     
-    print("Got big graph")
+    #print("Got big graph")
     return BigGraph
 
 def generateGraphOfComponents(components):
     G = nx.Graph()
     G.add_nodes_from(components)
 
-    print("Got graph of components")
+    #print("Got graph of components")
     return generateComponent(2, startingGraph=G)
 
 def connect2Components(G, c1, c2, L):

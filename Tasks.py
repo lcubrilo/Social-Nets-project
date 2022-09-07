@@ -1,7 +1,6 @@
 from SocnetPackage import GraphVisualisation
-from SocnetPackage.DataGeneration import SmallExamples, GenerateBigNets
 from SocnetPackage.BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
-from SocnetPackage.Metrics import Correlations, Asortativity, Degrees
+from SocnetPackage.Metrics import Asortativity, Degrees
 
 def printClusters(coalitions, noncoalitions, problemEdges):
     for coal in coalitions:
@@ -33,36 +32,39 @@ def getTitles(G, numComp, numCoal, areWeClusterable):
 
 # Well, given 1 graph - do the tasks on these three graphs
 #   1. the original graph itself
-#   3. each of the components
 #   2. the graph of components
+#   3. sample of the components
+from time import sleep
 
-def assignGraphsToTasks(G):
-    #1. Original graph 
-    #GraphVisualization.showGraph(G)
-    showMetrics(G)
-
-    #3. Each of the components
+def assignGraphsToTasks(G, graphName):
+    #Most essential functionality
     components = Clusters.BFSComponents(G)
     coalitions, noncoalitions, problemEdges = Coalitions.filterComponents(components)
     #printClusters(coalitions, noncoalitions)
-    G2 = GraphOfClusters.create(G)
 
+    #1. Original graph 
+    GraphVisualisation.showGraph(G, title=graphName, withLabels=False, showComponents=True)
+    showMetrics(G, graphName)
+
+    sleep(0.1)
     #2. Graph of components
-    GraphVisualisation.showGraph(G2)
-    showMetrics(G2)
+    G2 = GraphOfClusters.create(G)
+    GraphVisualisation.showGraph(G2, title=graphName + " components")
+    showMetrics(G2, graphName + " components graphed")
 
-    #Show a sample of components
-    GraphVisualisation.showGraphs(coalitions)
-    GraphVisualisation.showGraphs(noncoalitions)
+    sleep(0.1)
+    #3. Show a sample of components
+    GraphVisualisation.showGraphs(coalitions, "Coalitions of " + graphName)
+    GraphVisualisation.showGraphs(noncoalitions, "Noncoalition of " + graphName)
     """
     for graph in coalitions:
         showMetrics(graph)
     for graph in noncoalitions:
         showMetrics(graph)
     """
-def showMetrics(G):
-    Degrees.drawCCDegreeDistribution(G, True)   
-    Asortativity.drawKNNandDeg(G)
+def showMetrics(G, graphName = ""):
+    Degrees.drawCCDegreeDistribution(G, True, graphName)   
+    Asortativity.drawKNNandDeg(G, graphName)
     #TODO: x-axis deg; y-axis [3 centralities + shell index]
     #smth like Centrality.moreAsortativityGraphs(G)
 
