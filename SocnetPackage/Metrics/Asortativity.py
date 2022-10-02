@@ -1,6 +1,6 @@
 import networkx as nx
-from .Correlations import *
-from .Degrees import degreeOfNeighborhoodOf, groupNodesByDegree
+from Correlations import *
+from Degrees import degreeOfNeighborhoodOf, groupNodesByDegree
 import matplotlib.pyplot as plt
 
 def indexAsortativity(G = nx.Graph(), modified = False):

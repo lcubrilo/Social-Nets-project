@@ -2,24 +2,29 @@ import networkx as nx
 import matplotlib.pyplot as plt
 from statistics import mean
 from threading import Thread
+
+# from SocnetPackage.MetricPlots import correlations was this here for a reason?
 from .ComponentNamesColors import giveColors
 from random import sample
 
+# Component names hovering above in graph drawing
 def getComponentName(component):
     return component.nodes[list(component.nodes)[0]]["component"]
 
 def showComponentName(pos, component):
     positions = [pos[node] for node in component.nodes]
-    x, y = [p[0] for p in positions], [p[1] for p in positions]
-    plt.text(mean(x), mean(y), getComponentName(component))
+    x_axis, y_axis = [p[0] for p in positions], [p[1] for p in positions]
+    plt.text(mean(x_axis), mean(y_axis), getComponentName(component))
 
 def showComponentNames(pos, components):
-    if not components: return
-    if type(components) == list:
+    if not components: 
+        return
+    if type(components) == list: # TODO: why this if??
         for c in components:
             showComponentName(pos, c)
     else: showComponentName(pos, components)
 
+# TODO check if this still makes sense
 def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True):
     from time import time
     start = time()
@@ -63,6 +68,7 @@ def showGraph(G, components = [], title = "", AX = None, withLabels = True, font
     if AX == None:plt.show()
     #print(time()-start, G)
 
+# TODO check this too
 import math
 def showComponentGraph(components):
     #pos = nx.kamada_kawai_layout(G, seed=20)
@@ -87,6 +93,7 @@ def showComponentGraph(components):
         showComponentNames(pos, c)
     plt.show(block=True)
 
+# TODO check if this deprecated
 def showGraphAndComponents(G, components, G2, ttl):
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.set_title(ttl[1]); ax2.set_title(ttl[2])
@@ -96,6 +103,7 @@ def showGraphAndComponents(G, components, G2, ttl):
     
     plt.show()
 
+# TODO check if ok, bad or deprecated
 def showGraphs(Graphs, title, maxSize = 4):
     n = min(maxSize**2, len(Graphs))
     if n == 0: return
@@ -109,8 +117,53 @@ def showGraphs(Graphs, title, maxSize = 4):
         for j in range(matrixSize):
             graphIndex = i*matrixSize + j
             if graphIndex == n-1 or graphIndex == maxSize**2-1: break
-            graph = graphs[graphIndex]
+            graph = graphs[graphIndex] if type(graphs) == list else graphs
             showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
     
     fig.suptitle(title)
+    plt.show()
+
+#DISTRIBUTIONS
+from math import log2
+from SocnetPackage.Metrics import Correlations
+def showDistribution(x_axis, y_axis, metricName, graphName = ""):
+    fig, axs = plt.subplots(2, 2, constrained_layout = True)
+    #fig.tight_layout()
+
+    xlabels = [metricName]*3 + ["log " + metricName]
+    ylabels = ["Frequency", "CCD Frequency", "log CCDF", "log CCDF"]
+    titles = ["Distribution of "+metricName, "Complementary cumulative", "Linear == exp distr", "Linear == pow distr"]
+    correlations = []
+    # nothing
+    # accumulate that
+    # log y of that
+    # also log x of that
+    for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):
+        if yl[:3] == "log" and xl[:3] != "log": y_axis = [log2(e) if e>0 else 0.0 for e in y_axis]
+        if xl[:3] == "log": x_axis = [log2(e) if e > 0 else 0.0 for e in x_axis]
+        if yl[:3] == "CCD": 
+            n = len(y_axis)
+            for i in list(range(n-1, 0, -1)):
+                y_axis[i-1] += y_axis[i]
+            #print("Odradio CCD")
+        corrMsg, corrAmount = Correlations.correlData(x_axis, y_axis, "-", False, printReport=False)
+        correlations.append(corrAmount)
+        ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg)
+        ax.scatter(x_axis, y_axis)
+
+    Correlations.distReport(metricName, correlations)
+
+    suptitle = "{} - {}".format(metricName.upper(), graphName)
+    plt.suptitle(suptitle)
+    #plt.subplots_adjust(left=0.25, right=0.8, bottom=0.2, top=0.8, wspace= 0.4, hspace=0.8)
+    plt.savefig(suptitle+'.pdf')
+    plt.show()
+
+#CORRELATIONS TODO
+def showCorrelation(x_axis, y_axis, metricName1, metricName2, graphName = ""):
+    fig, axs = plt.subplots(1, 1, constrained_layout = True) #(2, 2, constrained_layout = True)
+    
+    ttl = "{} - {} & {}".format(graphName.upper(), metricName1.upper(), metricName2.upper())
+    axs.set(xlabel=metricName1, ylabel=metricName2, title=ttl+Correlations.correlData(x_axis, y_axis, ttl, False))
+    axs.scatter(x_axis, y_axis)
     plt.show()

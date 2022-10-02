@@ -36,23 +36,7 @@ def bigNet(numOfNodes, clusterable = True):
             res.add_edge(u, v, color="red")
 
     return res
-    """
-    Very meta: since this method didn't work as intended, had to put it to the chopping block... look how they massacred my boy
-        p = (1/log(numOfNodes, 2))
-        #print("Ruin at least{}% of clusters".format(round(p*100, 2)))
-        numberToRuin = ceil(p*len(components))
-        print("Ruin exactly {} clusters".format(numberToRuin))
-        for myBoy in sample(population=components, k=numberToRuin):
-            lookHowTheyMassacred(myBoy)
 
-    
-
-def lookHowTheyMassacred(component):
-    listOfEdges = list(component.edges)
-    howManyEdgesToRuin = poisson(ceil(0.05*len(listOfEdges))) + 1
-    whichEdgesToRuin = sample(listOfEdges, howManyEdgesToRuin)
-    for edge in whichEdgesToRuin:
-        component.add_edge(edge[0], edge[1], color = "red")"""
 
 def graphOfComponents2BigGraph(g, components):
     BigGraph = nx.Graph()

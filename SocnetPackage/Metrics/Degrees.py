@@ -1,20 +1,7 @@
-from re import L
 import networkx as nx
 import matplotlib.pyplot as plt
 from math import log10
-from .Correlations import correlData
-
-def averageNodeDegree(G):
-    l = len(G.edges)
-    n = len(G.nodes)
-
-    return 2*l/n
-
-def netDensity(G):
-    l, n = len(G.nodes), len(G.edges)
-    maxL = n*(n-1)
-
-    return l/maxL
+from Correlations import correlData
 
 def degreeOfNeighborhoodOf(G, x):
     res = []
@@ -103,8 +90,9 @@ def drawCCDegreeDistribution(G, testPowerExponential = False, graphName = ""):
         ax[1,1].set(xlabel = "log node degree", ylabel = "log CCDF", title="If linear: power law distribution" + correlData(x, y))
         ax[1,1].scatter(x,y)
 
+    import GraphMetrics
     plt.suptitle(graphName + "{}\nAverage degree: {}, Net density: {}%\n".format(
-        G, round(averageNodeDegree(G), 3), round(100*netDensity(G), 3)))
+        G, round(GraphMetrics.averageNodeDegree(G), 3), round(100*GraphMetrics.netDensity(G), 3)))
 
 
     plt.show()
