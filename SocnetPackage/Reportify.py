@@ -10,6 +10,19 @@ from SocnetPackage.GraphVisualisation import showGraphs, showGraph
 
 G, G2, mdFile, comps, coal, nonc, dataSourceName = None, None, None, None, None, None, None
 
+def shortenNam(nam):
+    opt1 = ["averageNodeDegree", "netDensity", "sMetric", "smallWorldCoefficitent", "netEfficiency", 'diameter', "radius", "averageClusteringCoefficient"]
+    sol1 = ["avgDeg", "dens", "sMet", "smlWrld", "effic", "diam", "rad", "avgClus"]
+    if nam in opt1:
+        return sol1[opt1.index(nam)]
+    
+    opt2 = ["degree", "shellIndex", "eccentricity", "clusteringCoefficient", "closenessCentrality", "eigenvectorCentrality"]
+    sol2 = ["deg", "shell", "eccen", "clust", "closn", "eigen"]
+    if nam in opt2:
+        return sol2[opt1.index(nam)]
+
+    return "Unknown metric name, can't shorten."
+
 # Helper function for doing subreports for: Graph, Clusters, Graph of Clusters
 def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam ime", components = None, romanNumeral = ""):
     global G, G2, dataSourceName, comps, coal, nonc, mdFile
@@ -38,18 +51,31 @@ def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
     else:
         #print("---------------------------------\nINPUT: {}\nTARGET: nodes".format(inputName))
         # TODO: unroll with kcore for huge SocNets, we dont have to see unrelevant guys and it showcases exp/pow growth
-        showGraph(Inputs, components, inputName, withLabels= (inputName != "Original_graph"), sourceDataFileName = dataSourceName)
         # TODO DRAW GRAPH BUT WITH NODES COLORED THE INTENSITY OF METRIC
         #print("---------------------------------\nOPTIONAL REPORT - {}: \njust single values, metrics of the {}".format(inputName, inputName))
         targetsOfMetric = list(Inputs.nodes())
         mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/SocialNetwork.png".format(dataSourceName, inputName)))
         
         mdFile.new_header(level=2, title="OPTIONAL REPORT - {}: \njust single values, metrics of the {}".format(inputName, inputName))
-        s = "" 
+        lines = "" 
         for met, nam in optionalPreReportMetrics: # Metrics2 can only be graph-wide metrics for G or G2
             #print("Sad radimo", nam)
-            s += "    - " + nam + " " + str(doMetric(Graph, None, met, nam)) + "\n"
-        mdFile.new_paragraph(s) # Print the optional part of report
+            metVal = doMetric(Graph, None, met, nam)
+            if nam == "netEfficiency":
+                print("Ustavljaj")
+            if type(metVal) == str:
+                print("Zasto exceptions ne rade svoj posao")
+            stringLine = "    - " + nam + " " + str(metVal)
+            if metVal > 1 or metVal < -1:
+                numRepres = "{}".format(round(metVal, 2))
+            else:
+                numRepres = "{:.2%}".format(metVal) 
+            graphLine = "{}:{}; ".format(shortenNam(nam), numRepres)
+            mdFile.new_line(stringLine)
+            lines += graphLine
+
+        showGraph(Inputs, components, lines, withLabels= (inputName != "Original_graph"), sourceDataFileName = dataSourceName, saveDirName= inputName, suptitle=inputName)
+        # mdFile.new_paragraph(lines) # Print the optional part of report
         # print("We may now proceed")
         # TODO edges? I think only in corr; can't see logic in distr
     #endregion

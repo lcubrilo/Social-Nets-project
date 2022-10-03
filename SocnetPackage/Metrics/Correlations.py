@@ -174,10 +174,9 @@ def distReport(metricName, linearCorrelations, coals = ""):
 
         # Still nothing? Damn.
         if sb == "": sb="very uninteresting, chances exp: {:.2%},  pow: {:.2%}.".format(expProb, powProb)
-
-    # Kakav je ovo raspad TODO    
-    retVala = "    - " + metricName + "(coals): " + sa
-    retValb = "    - " + metricName + "(noncoals): " + sb
+   
+    retVala = "    * " + metricName + "(coals): " + sa
+    retValb = "    * " + metricName + "(noncoals): " + sb
     #print(retVal) 
     return retVala + "\n" + retValb
 

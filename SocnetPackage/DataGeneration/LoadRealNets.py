@@ -84,6 +84,7 @@ def getNet(name):
         return loadFunc() #TODO: change
     else:
         return G
+    print("Got net")
 
 
 def graphToTxt(G, path = "SocnetPackage\DataGeneration"):

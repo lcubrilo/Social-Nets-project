@@ -26,9 +26,10 @@ def showComponentNames(pos, components):
     else: showComponentName(pos, components)
 
 # TODO check if this still makes sense
-def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True, sourceDataFileName = "lolexd"):
+def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True, sourceDataFileName = "lolexd", saveDirName = "", suptitle = ""):
     from time import time
     start = time()
+    plt.figure(figsize=(14,10))
     if title == "": title = str(G)
 
     def getEdgeColorsWeights():
@@ -67,7 +68,8 @@ def showGraph(G, components = [], title = "", AX = None, withLabels = True, font
         ax = AX)
     
     if AX == None:
-        plt.savefig(fname="Report/{}/{}/SocialNetwork.png".format(sourceDataFileName, title))
+        plt.suptitle(suptitle)
+        plt.savefig(fname="Report/{}/{}/SocialNetwork.png".format(sourceDataFileName, saveDirName))
         plt.show()
         
     #print(time()-start, G)

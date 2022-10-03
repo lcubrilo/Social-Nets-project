@@ -5,6 +5,7 @@ import networkx as nx
 # (I obviously need a list of inputs for both)
 
 def doMetric(Graph, targetsOfMetric, metric, metricName): 
+    
     if targetsOfMetric != None:
         if type(targetsOfMetric) == list:
             retVal = []
@@ -14,7 +15,10 @@ def doMetric(Graph, targetsOfMetric, metric, metricName):
     elif type(Graph) == list:
         return [metric(G) for G in Graph]
     else: #Got just one (should happen only in the optional pre-report)
-        return metric(Graph, targetsOfMetric)
+        retVal = metric(Graph, targetsOfMetric)
+        if type(retVal) != str or retVal != None:
+            return retVal
+        print("Hjustone.")
 
 
 def distributions(metricsVals, metricNames = "", thingName = "", coalitions = [], components = [], fileName = ""): 
@@ -120,27 +124,35 @@ def graphOfAllCorrelations(corrMat, MetricNames, graphName="", sourceInputFileNa
     corrMat1, corrMat2 = corrMat
     fig, ax = plt.subplots(1, 1, figsize=(14,10))
     plotX, plotY, sizes, colors = [], [], [], []
+    ax.axline([0, 0], [1, 1], color = 'darkgreen')
     for i, nam1 in enumerate(MetricNames):
         for j, nam2 in enumerate(MetricNames):
+            if i>=j: continue;
             offset = 0
             for corr in corrMat:
                 # Prepare data for scatter
                 plotX.append(MetricNames.index(nam1)+offset)
                 plotY.append(MetricNames.index(nam2)+offset)
-                sizes.append(20+(55*abs(corr[nam1][nam2]))**2)
+                sizes.append(20+(65*abs(corr[nam1][nam2]))**2)
                 colors.append(determineColor(corr[nam1][nam2]))
 
                 # Write actual labels/vals/text on top
-                scale = 1.015; move = 0.35
-                posX = (i*scale + move) / len(MetricNames)
-                posY = (j*scale + move) / len(MetricNames)
+                scaleX = 1.24; scaleY = 1.06; move = 0.35
+                posX = (i*scaleX + move) / len(MetricNames)
+                posY = (j*scaleY + move) / len(MetricNames)
                 bothCorr = "{:.0%}, {:.0%}".format(corrMat1[nam1][nam2], corrMat2[nam1][nam2])
                 plt.text(posX, posY, bothCorr, transform=ax.transAxes)
                 offset += 0.15
-    plt.text(-0.05, 1, "Red and green strong correlations, purple and olive medium, blue weak, black empty\nPearson downleft, Spearman upright", transform=ax.transAxes)
-    ax.set(title = "Red and green strong correlations, purple and olive medium, blue weak, black empty")
+
+    plt.text(0.8, 0.1,"Pearson downleft, Spearman upright\nRed and green strong correlations\nPurple and olive medium\nblue weak, black empty", transform=ax.transAxes, horizontalalignment='right')
+    #ax.set(title = "Red and green strong correlations, purple and olive medium, blue weak, black empty")
     ax.scatter(plotX, plotY, sizes, colors, alpha = 0.7)
     fig.suptitle("(DIS)/(A)/(NON)SORTATIVITY (more green, red, blue respectively): Correlation between metrics for "+graphName)
+
+    labels = []; labels.append(""); 
+    for mn in MetricNames: labels.append(mn)
+    ax.set_xticklabels(labels); ax.set_yticklabels(labels)
+
     plt.savefig(fname="Report/{}/{}/CORR_COLORMAP.png".format(sourceInputFileName, graphName))
     plt.show(); plt.close();
 

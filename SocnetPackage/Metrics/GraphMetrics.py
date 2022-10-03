@@ -37,12 +37,12 @@ def getMetrics(G, trash=None):
         #TODO clustering coefficient
         #TODO  deprecate this 
     ]
-"""
+
 def printMetrics(G, trash=None):
     return "S metric: {}, Small world: {}, Net efficiency: {}, Diameter: {}, Radius: {}".format(
         *[round(m) for m in getMetrics(G, trash=None)]
     )
-
+"""
 
 def smallWorldCoefficitent(G, trash=None):
     #if len(G.edges > 6000):
@@ -74,13 +74,21 @@ def eccentricities(G, trash = None, n = None):
             if line[1][v] > max: 
                 max = line[1][v]
         res[line[0]] = max
+        if type(max) != int:
+            raise Exception ("Brate ali kako")
     return res if not n else res[n]
 
 def diameter(G, trash=None):
-    return max(eccentricities(G, trash=None))
+    try:
+        return max(eccentricities(G, trash=None).values())
+    except:
+        return -1
 
 def radius(G, trash=None):
-    return min(eccentricities(G, trash=None))
+    try:
+        return min(eccentricities(G, trash=None).values())
+    except:
+        return -1
 
 def averageClusteringCoefficient(G, trash=None):
     from SocnetPackage.Metrics.NodeMetrics import clusteringCoefficient
