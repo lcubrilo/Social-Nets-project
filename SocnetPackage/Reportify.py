@@ -3,10 +3,16 @@ def handleGraphInput(G):
     from .BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
 
     comps = Clusters.BFSComponents(G)
-    # TODO print a report coal, nonc, problemEdges = Coalitions.filterComponents(comps)
+    coal, nonc, problemEdges = Coalitions.filterComponents(comps)
     G2 = GraphOfClusters.create(G)
 
     print("---------------------------------\nSEPARATED ORIGINAL GRAPH, COMPONENTS, GRAPH OF COMPONENTS")
+    
+    if problemEdges != []:
+        print("This graph is not clusterable.")
+        print("The following edges are the preventing this: {}".format(problemEdges))
+    else: print("This graph is clusterable!")
+    print("There are {} components/clusters. {} coalitions and {} noncoalitions".format(len(comps),len(coal), len(nonc)))
 
     from SocnetPackage.Metrics.GraphMetrics import graphMetrics
     from SocnetPackage.Metrics.NodeMetrics import nodeMetrics
@@ -50,14 +56,15 @@ def handleGraphInput(G):
             print("   - ", nam, val)
             metricsVals.append(val)
             metricNames.append(nam)
-            
+
+        nonlocal coal, nonc, problemEdges    
         print("---------------------------------\nMAIN REPORT - {}: distributions and correlations of those metrics".format(inputName))
-        distributions(metricsVals, metricNames, inputName)
-        correlations(targetsOfMetric, metricsVals, metricNames, inputName)
+        distributions(metricsVals, metricNames, inputName, coal, comps)
+        correlations(targetsOfMetric, metricsVals, metricNames, inputName, coal, comps)
         # TODO: save returnvals, and pass them to distr and corr; to be efficient
         print("\n\n\n\n\n")
 
 
-    #reportify(G, nodeMetrics(), graphMetrics(), inputName = "Original graph", components=comps)
+    reportify(G, nodeMetrics(), graphMetrics(), inputName = "Original graph", components=comps)
     reportify(comps, graphMetrics(), inputName = "Components")
-    #reportify(G2, nodeMetrics(), graphMetrics(), inputName = "Graph of components")
+    reportify(G2, nodeMetrics(), graphMetrics(), inputName = "Graph of components")

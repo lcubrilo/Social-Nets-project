@@ -1,3 +1,4 @@
+from re import X
 import networkx as nx
 import matplotlib.pyplot as plt
 from statistics import mean
@@ -116,6 +117,7 @@ def showGraphs(Graphs, title, maxSize = 4):
     for i in range(matrixSize):
         for j in range(matrixSize):
             graphIndex = i*matrixSize + j
+            if graphIndex > len(graphs): break
             if graphIndex == n-1 or graphIndex == maxSize**2-1: break
             graph = graphs[graphIndex] if type(graphs) == list else graphs
             showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
@@ -126,7 +128,7 @@ def showGraphs(Graphs, title, maxSize = 4):
 #DISTRIBUTIONS
 from math import log2
 from SocnetPackage.Metrics import Correlations
-def showDistribution(x_axis, y_axis, metricName, graphName = ""):
+def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = [], components = []):
     fig, axs = plt.subplots(2, 2, constrained_layout = True)
     #fig.tight_layout()
 
@@ -134,36 +136,78 @@ def showDistribution(x_axis, y_axis, metricName, graphName = ""):
     ylabels = ["Frequency", "CCD Frequency", "log CCDF", "log CCDF"]
     titles = ["Distribution of "+metricName, "Complementary cumulative", "Linear == exp distr", "Linear == pow distr"]
     correlations = []
+        
     # nothing
     # accumulate that
     # log y of that
     # also log x of that
-    for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):
-        if yl[:3] == "log" and xl[:3] != "log": y_axis = [log2(e) if e>0 else 0.0 for e in y_axis]
-        if xl[:3] == "log": x_axis = [log2(e) if e > 0 else 0.0 for e in x_axis]
-        if yl[:3] == "CCD": 
-            n = len(y_axis)
-            for i in list(range(n-1, 0, -1)):
-                y_axis[i-1] += y_axis[i]
-            #print("Odradio CCD")
-        corrMsg, corrAmount = Correlations.correlData(x_axis, y_axis, "-", False, printReport=False)
-        correlations.append(corrAmount)
-        ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg)
-        ax.scatter(x_axis, y_axis)
+    #print("X OSA PRE", x_axis)
+    correlMsgs = []
+    def filling(x_axis, y_axis, color = "black"):
+        debugMsg = ""
+        for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):  
+            if yl[:3] == "log" and xl[:3] != "log":
+                y_axis = [log2(e) if e>0 else 0.0 for e in y_axis]; ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg); ax.scatter(x_axis, y_axis, c=color); continue;
+            if xl[:3] == "log":
+                x_axis = [log2(e) if e>0 else 0.0 for e in x_axis]; ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg); ax.scatter(x_axis, y_axis, c=color); continue;
+            if yl[:3] == "CCD": 
+                debugMsg = str(y_axis)
+                n = len(y_axis)
+                for i in list(range(n-1, 0, -1)):
+                    y_axis[i-1] += y_axis[i]
+            corrMsg, corrAmount = Correlations.correlData(x_axis, y_axis, xl+"-"+yl, False, printReport=False)
+            ax.scatter(x_axis, y_axis, c=color)
+            correlMsgs.append(corrMsg)
+            #if str(corrAmount) == "nan": continue
+            correlations.append(corrAmount)
 
-    Correlations.distReport(metricName, correlations)
+        for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):
+            finalMessage = "Coals" + correlMsgs[0][1:] + "vs Nonc" + correlMsgs[1][1:]
+            ax.set(xlabel=xl, ylabel=yl, title=finalMessage)     
+
+        #if yl[:3] == "CCD": print("CCD",metricName,debugMsg,y_axis)
+        #print("X OSA POSLE", x_axis)
+        if color == "black":
+            arg = ""
+        elif color == "red":
+            arg = "(noncoalition)"
+        else:
+            arg = "(coalition)"
+        Correlations.distReport(metricName, correlations, arg)
+    
+    if coalitions == [] and components == []: filling(x_axis, y_axis)
+    else:
+        coalX_axis, coalY_axis = [], []
+        nonCX_axis, nonCY_axis = [], []
+        for x, y, comp in zip(x_axis, y_axis, components):
+            if comp in coalitions:
+                coalX_axis.append(x); coalY_axis.append(y)
+            else:
+                nonCX_axis.append(x); nonCY_axis.append(y)
+        filling(coalX_axis, coalY_axis, "blue")
+        filling(nonCX_axis, nonCY_axis, "red")
+        
 
     suptitle = "{} - {}".format(metricName.upper(), graphName)
     plt.suptitle(suptitle)
     #plt.subplots_adjust(left=0.25, right=0.8, bottom=0.2, top=0.8, wspace= 0.4, hspace=0.8)
     plt.savefig(suptitle+'.pdf')
     plt.show()
+    plt.close()
 
 #CORRELATIONS TODO
-def showCorrelation(x_axis, y_axis, metricName1, metricName2, graphName = ""):
+def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName = "", coalitions = [], components = []):
+    #print("GraphVisualization.py, correlData trying to get 2 numbers {}".format(Correlations.correlData(x_axis, y_axis)))
+    #corr1, corr2 = Correlations.correlData(x_axis, y_axis)
+    #if min(corr1, corr2) < 0.9: 
+    #    raise Exception("GraphVisualization.py finds you not worthy")
+        
     fig, axs = plt.subplots(1, 1, constrained_layout = True) #(2, 2, constrained_layout = True)
     
-    ttl = "{} - {} & {}".format(graphName.upper(), metricName1.upper(), metricName2.upper())
-    axs.set(xlabel=metricName1, ylabel=metricName2, title=ttl+Correlations.correlData(x_axis, y_axis, ttl, False))
+    ttl = "{} & {}".format(metricName1.upper(), metricName2.upper())
+    title = ttl#+Correlations.distReport(ttl, [corr1, corr1])
+    axs.set(xlabel=metricName1, ylabel=metricName2, title=graphName.upper()+"-"+title)
     axs.scatter(x_axis, y_axis)
-    plt.show()
+    plt.savefig(ttl+'corr.pdf')
+    #plt.show()
+    plt.close()

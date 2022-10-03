@@ -1,8 +1,8 @@
 # Node metrics
 import networkx as nx
 
-nodes = []
-D, P = [[]], [[]]
+nodes = {}
+D, P = {}, {}
 
 # Use BFS to fill D and P used for between and closeness
 def calcDPMatrix(G):
@@ -11,15 +11,15 @@ def calcDPMatrix(G):
 
     n = len(nodes)
     
-    def fillMatrix(M, n):
-        M = []
-        for i in range(n):
-            row = []
-            for j in range(n):
-                row.append(0)
-            M.append(row)
+    def fillMatrix(M, nodes):
+        M = {}
+        for n1 in nodes:
+            n1 = n1
+            M[n1] = {}
+            for n2 in nodes:
+                M[n1][n2] = 0
         return M
-    D, P = fillMatrix(D, n), fillMatrix(P, n)
+    D, P = fillMatrix(D, G.nodes()), fillMatrix(P, G.nodes())
     from collections import deque; queue = deque()
     visited = []
 
@@ -63,18 +63,21 @@ def betweennessCentrality(G, z):
 
     # Sigma gets values from D and P
     def sigma(x, y, z = None): 
-        if P == [[]] or D == [[]]: calcDPMatrix(G)
+        if P == {} or D == {}: 
+            calcDPMatrix(G)
         if not z: return P[x][y]
 
         # Use inequality of triangles
-        if D[x][y] < D[x][z] + D[y][z]: return 0
-        else: return P[x][z] * P[z][y]
+        if D[x][y] < D[x][z] + D[y][z]:
+            return 0
+        else:
+            return P[x][z] * P[z][y]
 
     return sum(sigma(x,y,z)/sigma(x, y) for x in nodes for y in nodes if sigma(x,y)!=0)
   
 # 2. Closeness Centrality
 def closenessCentrality(G, z):
-    if D == [[]]: calcDPMatrix(G)
+    if D == {}: calcDPMatrix(G)
     global nodes
     nodes = G.nodes
     if z == None:
@@ -82,19 +85,21 @@ def closenessCentrality(G, z):
     return sum( [D[n][z] for n in nodes] )
 
 # 3. Eigenvector Centrality
-eigenvectorCentralities = []
+eigenvectorCentralities = {}
 def eigenvectorCentrality(G, node, epsilon = 0.01, maxiter = 10**6):
     # A little trick if we've already calculated this
     global eigenvectorCentralities
-    if eigenvectorCentralities != []: return eigenvectorCentralities[node]
+    if eigenvectorCentralities != {}: return eigenvectorCentralities[node]
 
     nodes = G.nodes
-    delta = epsilon; i = maxiter
-    Ce = [1 for i in range(len(nodes))] # Start with everybody being equal
-    curr_ce = [0 for i in range(len(nodes))]
+    delta = epsilon; old_delta = 2*delta; i = maxiter
+    Ce = {n:1 for n in nodes}# Start with everybody being equal
+    curr_ce = {n:0 for n in nodes}
 
-    while delta >= epsilon and i > 0:
+    while abs(old_delta-delta)/delta >= epsilon and delta >= epsilon and i > 0:
         i -= 1
+        if i%1000 == 0:
+            print(delta)
         
         # In this iteration, get values for every node
         for n in nodes:
@@ -103,29 +108,30 @@ def eigenvectorCentrality(G, node, epsilon = 0.01, maxiter = 10**6):
             for neigh in G.neighbors(n):
                 curr_ce[n] += Ce[neigh]
         
-        def length(v): return sum([x**2 for x in v])**0.5 # Pythagora's for length
-        def normalize(v): l = length(v); return [x/l for x in v] # Divide by length
+        def length(v): return sum([v[x]**2 for x in v])**0.5 # Pythagora's for length
+        def normalize(v): l = length(v); return {x:v[x]/l for x in v} if l!= 0 else {1} # Divide by length
         curr_ce = normalize(curr_ce)
 
         # Compute distance of this and previous iteration
-        delta = sum( [abs(x1-x2) for (x1,x2) in zip(curr_ce, Ce)] )
+        old_delta = delta
+        delta = sum( [abs(curr_ce[x1]-Ce[x2]) for (x1,x2) in zip(curr_ce, Ce)] )
 
         # Move over one spot
-        Ce = [x for x in curr_ce]
+        Ce = {x:curr_ce[x] for x in curr_ce}
 
     # print(Ce)
     eigenvectorCentralities = Ce; 
     return eigenvectorCentralities[node]
 
-shellValues = []
+shellValues = {}
 def shellIndex(G, node):
     global shellValues
-    if shellValues != []:
+    if shellValues != {}:
         return shellValues[node]
 
     nodes = G.nodes()
     currnodes = nodes # Constantly shrinking amount of nodes interesting to us
-    res = [0]*len(nodes) # AFAIK every node does have shell index 0; only by each successive iteration do they actually prove their shell index to be higher by one
+    res = {n:0 for n in nodes} # AFAIK every node does have shell index 0; only by each successive iteration do they actually prove their shell index to be higher by one
     k = 0 # Will be iterating k values as far as possible
     # Peel k by k the shells until the very core when no one remains
     while len(currnodes) > 0:
@@ -143,7 +149,7 @@ def shellIndex(G, node):
 def clusteringCoefficient(G, node):        
     hisNeighbors = G.neighbors(node)
     num = G.degree(node)
-    if num < 2: return 0
+    if num < 2: return -1
 
     # What portion of em are connected?
     maximumNumberOfConnections = num*(num-1)
@@ -161,7 +167,7 @@ def degree(G, node):
 
 # Even though it's a node metric, it has to be calculated graph-wide
 # Let's do that only once and store the value
-eccentricitiesValues = []    
+eccentricitiesValues = {}    
 def eccentricity(G, node): 
     # Get the graphwide vals
     global eccentricitiesValues
@@ -172,6 +178,8 @@ def eccentricity(G, node):
     return eccentricitiesValues[node]
 
 def nodeMetrics():
+    global D, P, eccentricitiesValues, eigenvectorCentralities, nodes, shellValues
+    D = {}; P = {}; eccentricitiesValues = {}; eigenvectorCentralities = {}; nodes = {}; shellValues = {}
     return zip([degree, shellIndex, eccentricity, clusteringCoefficient, betweennessCentrality, closenessCentrality, eigenvectorCentrality],
     ["degree", "shellIndex", "eccentricity", "clusteringCoefficient", "betweennessCentrality", "closenessCentrality", "eigenvectorCentrality"])
 

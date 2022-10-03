@@ -67,13 +67,13 @@ def netEfficiency(G, trash = None):
 
 #Technically node metric
 def eccentricities(G, trash = None, n = None):
-    res = []
+    res = {}
     for line in nx.all_pairs_shortest_path_length(G):
         max = 0
         for v in line[1]:
             if line[1][v] > max: 
                 max = line[1][v]
-        res.append(max)
+        res[line[0]] = max
     return res if not n else res[n]
 
 def diameter(G, trash=None):
@@ -85,7 +85,11 @@ def radius(G, trash=None):
 def averageClusteringCoefficient(G, trash=None):
     from SocnetPackage.Metrics.NodeMetrics import clusteringCoefficient
     coefs = [clusteringCoefficient(G, node) for node in G.nodes()]
-    return sum(coefs)/len(coefs)
+    try:
+        while True: coefs.remove(-1)
+    finally: 
+        if len(coefs) <= 0: return -1
+        return sum(coefs)/len(coefs)
 
 def graphMetrics():
     return zip([averageNodeDegree, netDensity, sMetric, smallWorldCoefficitent, netEfficiency, diameter, radius, averageClusteringCoefficient],

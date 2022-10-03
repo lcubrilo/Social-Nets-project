@@ -28,7 +28,6 @@ def BFSComponents(G, legitimateLinksFunction = None):
             G.nodes[x]["color"] = thisComponentsColor
             visited.append(x)
             queue.append(x)
-        
         def onlyPositiveNeighbors(x):
             positiveNeighbors = []
             for neighbor in G.neighbors(x):
