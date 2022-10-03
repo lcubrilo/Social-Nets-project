@@ -180,8 +180,8 @@ def eccentricity(G, node):
 def nodeMetrics():
     global D, P, eccentricitiesValues, eigenvectorCentralities, nodes, shellValues
     D = {}; P = {}; eccentricitiesValues = {}; eigenvectorCentralities = {}; nodes = {}; shellValues = {}
-    return zip([degree, shellIndex, eccentricity, clusteringCoefficient, betweennessCentrality, closenessCentrality, eigenvectorCentrality],
-    ["degree", "shellIndex", "eccentricity", "clusteringCoefficient", "betweennessCentrality", "closenessCentrality", "eigenvectorCentrality"])
+    return zip([degree, shellIndex, eccentricity, clusteringCoefficient, closenessCentrality, eigenvectorCentrality],
+    ["degree", "shellIndex", "eccentricity", "clusteringCoefficient", "closenessCentrality", "eigenvectorCentrality"])
 
 def test():
     import networkx as nx

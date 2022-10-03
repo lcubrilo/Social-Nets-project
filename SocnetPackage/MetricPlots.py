@@ -16,27 +16,12 @@ def doMetric(Graph, targetsOfMetric, metric, metricName):
     else: #Got just one (should happen only in the optional pre-report)
         return metric(Graph, targetsOfMetric)
 
-# See distribution for a metric; List input is called "things"
-# x-axis: metricVals = doMetric(things)
-# y-axis: count(mV); mV € metricVals
+
 def distributions(metricsVals, metricNames = "", thingName = "", coalitions = [], components = [], fileName = ""): 
-    """ 
-   DEPRECATED: just give me values, don't make me calc them
-   #If input not a list make it a list
-    if type(sfgsgdgdeafgdegdfg) != list: 
-        rtghrrthtntt = sfgsgdgdeafgdegdfg.nodes if type(sfgsgdgdeafgdegdfg) == type(nx.Graph()) else sfgsgdgdeafgdegdfg
-    else: # This means we got components/coalitions/clusters w/e
-        rtghrrthtntt = sfgsgdgdeafgdegdfg
+    """ # See distribution for a metric; List input is called "things"
+    ## x-axis: metricVals = doMetric(things)
+    ## y-axis: count(mV); mV € metricVals"""
     
-    # X AXIS
-    # If no values given, calc them
-    if not metricsVals:
-        metricsVals = [doMetric(rtghrrthtntt, metric, metricName) for metric, metricName in metrics]
-    # If they're given, it has to make sense - match the no of maetrics
-    elif not metrics:
-        metricsVals = metricsVals
-    elif len(metricsVals) != len(metrics): 
-        metricsVals = [doMetric(rtghrrthtntt, metric, metricName) for metric, metricName in metrics]"""
     # Y AXIS
     # We are going through every metric
     print("\n I DISTRIBUTIONS")
@@ -56,7 +41,8 @@ def distributions(metricsVals, metricNames = "", thingName = "", coalitions = []
         valFreq = {}
         # We are going through every value of that metric
         for metVal in metricVals:
-            if metVal not in valFreq: valFreq[metVal] = 0
+            if metVal not in valFreq: 
+                valFreq[metVal] = 0
             valFreq[metVal]+=1
         
         x = []; y = []
@@ -76,10 +62,10 @@ from SocnetPackage.Metrics import Correlations
 # 
 # Note: the common connecting logic of the two axes (AKA what are things1 and things2) can be two things:
 #
-#   1. those metrics are being run for the exact same node. (things1 == things2)
+#   1. those metrics are being run for the exact same node. (things1 == things2) implemented
 #       Eg - if a node has high betwennees centrality, how likely will it ALSO BE OF high eigen centrality
 #
-#   2. those metrics are being run for two neighbors (things1 != things2 && (t1, t2) € G.edges())
+#   2. those metrics are being run for two neighbors (things1 != things2 && (t1, t2) € G.edges()) TODO
 #       Eg - if a node has a betwennees centrality, how likely will likely will it BE CONNECTED TO high eigen centrality
 def shorterMetricNames(metricNames):
     if metricNames[0] == "averageDegree":
@@ -96,16 +82,7 @@ def shorterMetricNames(metricNames):
         "radius":"rad", 
         "averageClusteringCoefficient":"avgClusC"
     }"""
-def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [], components = [], sourceInputFileNAme = ""):
-    """
-    DEPRECATED
-    # If input not a list, make it a list
-    if type(Thing) != list: 
-        things = Thing.nodes
-        #for edge in Thing.edges: # TODO: Why edges???? Maybe makes sense as a parallel thing to nodes; smth like correlations(edges, metrics); correlations(nodes, metrics) but cannot be mixed like  this
-            #things.append(edge[0], edge[1])
-    else:
-        things = Thing"""
+def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [], components = [], sourceInputFileName = ""):
     print("\n II CORRELATIONS")
     shortMetricNames = shorterMetricNames(MetricNames)
     import pandas as pd; from IPython.display import display
@@ -113,41 +90,76 @@ def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [],
     display(df.to_markdown())
     
     print("--------------")
-    corrMat = df.corr()
+    corrMat1 = df.corr()
     corrMat2 = df.corr("spearman")
-    for axis1 in corrMat:
+    for axis1 in corrMat1:
         if type(axis1) == str: continue
         for axis2 in axis1:
             axis2 = round(axis2, 4)
     #corrMat.columns = shortMetricNames
-    display(corrMat.to_markdown())
+    display(corrMat1.to_markdown())
 
+    textForTheReport = "### Most significant correlations:\n"
+    for i, nam1 in enumerate(MetricNames):
+        for j, nam2 in enumerate(MetricNames):
+            currCorr = corrMat1[nam1][nam2]
+            if i>=j: continue
+            if corrMat1[nam1][nam2] > 0.8 or corrMat2[nam1][nam2] > 0.8:
+                showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName, sourceDataFileName=sourceInputFileName)
+                textForTheReport += Correlations.distReport("{}-{}".format(nam1, nam2), [currCorr, corrMat2[nam1][nam2]]) + "\n"
+            #else:
+                #print("{}&{} combo was fruitless.".format(nam1, nam2))
+      
+    #TODO
+    #plt.show()
+    graphOfAllCorrelations((corrMat1, corrMat2), MetricNames, graphName, sourceInputFileName)
+    return df.to_markdown(), corrMat1.to_markdown(), textForTheReport
+
+def graphOfAllCorrelations(corrMat, MetricNames, graphName="", sourceInputFileName = ""):
     import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1,1)
+    corrMat1, corrMat2 = corrMat
+    fig, ax = plt.subplots(1, 1, figsize=(14,10))
     plotX, plotY, sizes, colors = [], [], [], []
     for i, nam1 in enumerate(MetricNames):
         for j, nam2 in enumerate(MetricNames):
-            currCorr = corrMat[nam1][nam2]
-            if str(currCorr) != "nan":
-                if currCorr < -0.8: color = "red"
-                elif currCorr < -0.5: color = "purple"
-                elif currCorr > 0.8: color = "green"
-                elif currCorr > 0.5: color = "olive"
-                else: color = "blue"
-                plotX.append(nam1); plotY.append(nam2); sizes.append(20+(30*abs(currCorr))**2); colors.append(color if i!=j else "darkgreen")
-            else:  plotX.append(nam1); plotY.append(nam2); sizes.append(20); colors.append("black")
-            plt.text((i*1.015+0.35)/len(MetricNames), (j*1.015+0.35)/len(MetricNames), str(round(currCorr*100, 2))+"%", transform=ax.transAxes)
-            if i>=j: continue
-            if currCorr > 0.8:
-                showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName, sourceDataFileName=sourceInputFileNAme)
-                print(Correlations.distReport("{}-{}".format(nam1, nam2), [currCorr, corrMat2[nam1][nam2]]))
-            #else:
-                #print("{}&{} combo was fruitless.".format(nam1, nam2))
-    
+            offset = 0
+            for corr in corrMat:
+                # Prepare data for scatter
+                plotX.append(MetricNames.index(nam1)+offset)
+                plotY.append(MetricNames.index(nam2)+offset)
+                sizes.append(20+(55*abs(corr[nam1][nam2]))**2)
+                colors.append(determineColor(corr[nam1][nam2]))
+
+                # Write actual labels/vals/text on top
+                scale = 1.015; move = 0.35
+                posX = (i*scale + move) / len(MetricNames)
+                posY = (j*scale + move) / len(MetricNames)
+                bothCorr = "{:.0%}, {:.0%}".format(corrMat1[nam1][nam2], corrMat2[nam1][nam2])
+                plt.text(posX, posY, bothCorr, transform=ax.transAxes)
+                offset += 0.15
+    plt.text(-0.05, 1, "Red and green strong correlations, purple and olive medium, blue weak, black empty\nPearson downleft, Spearman upright", transform=ax.transAxes)
     ax.set(title = "Red and green strong correlations, purple and olive medium, blue weak, black empty")
-    ax.scatter(plotX, plotY, sizes, colors, alpha = 0.8)
+    ax.scatter(plotX, plotY, sizes, colors, alpha = 0.7)
     fig.suptitle("(DIS)/(A)/(NON)SORTATIVITY (more green, red, blue respectively): Correlation between metrics for "+graphName)
-    plt.savefig(fname="Report/{}/{}/CORR_COLORMAP.png".format(sourceInputFileNAme, graphName))
-    #TODO
-    #plt.show()
-    return df.to_markdown(), corrMat.to_markdown()
+    plt.savefig(fname="Report/{}/{}/CORR_COLORMAP.png".format(sourceInputFileName, graphName))
+    plt.show(); plt.close();
+
+def determineColor(correlationStrength):
+    # Probably NaN
+    if correlationStrength == 0: return "black" 
+
+    # Impossible, kinda hide urself
+    if abs(correlationStrength) > 1: return "white" 
+
+    # As intense as it gets
+    if correlationStrength == 1: return "darkgreen"
+    if correlationStrength == -1: return "darkred"
+
+    # Shades
+    if correlationStrength < -0.8: return "red"
+    elif correlationStrength < -0.5: return "purple"
+    elif correlationStrength > 0.8: return "green"
+    elif correlationStrength > 0.5: return "olive"
+
+    # Not too interesting
+    else: return "blue"

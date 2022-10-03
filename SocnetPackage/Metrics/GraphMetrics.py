@@ -23,7 +23,7 @@ def indexOfAsortativity(G, trash=None):
 
 def sMetric(G, trash=None):
     return sum([G.degree(u)*G.degree(v) for (u, v) in G.edges])   
-
+"""
 #Paths based metrics
 def getMetrics(G, trash=None):
     return [
@@ -37,7 +37,7 @@ def getMetrics(G, trash=None):
         #TODO clustering coefficient
         #TODO  deprecate this 
     ]
-
+"""
 def printMetrics(G, trash=None):
     return "S metric: {}, Small world: {}, Net efficiency: {}, Diameter: {}, Radius: {}".format(
         *[round(m) for m in getMetrics(G, trash=None)]

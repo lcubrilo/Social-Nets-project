@@ -1,7 +1,6 @@
 # Linearity correlation
 from logging import raiseExceptions
 
-
 def pearsonCorrelation(x, y, cheat = None):
     if cheat == None: cheat = len(x) > 50
     # Helper function
@@ -78,23 +77,24 @@ def correlData(x, y, ttl="-", showAmount=True, printReport=True, both = False):
     #print(type(df), type(df.corr()[xName][yName]))
     #print("df x{}x \t corr x{}x".format(df, df.corr()))
     linearCorrelation = df.corr(method="pearson")[xName][yName]
-    anyCorrelation = df.corr(method="spearman")[xName][yName]
+    rankCorrelation = df.corr(method="spearman")[xName][yName]
 
-    corrAmount = "\n(linear={:.2%} correlated={:.2%})\n".format(linearCorrelation, anyCorrelation)
-    interpretation = correlMsg(linearCorrelation, "pearson") + " & " + correlMsg(anyCorrelation, "spearman") + " "
+    corrAmount = "\n(linear={:.2%} correlated={:.2%})\n".format(linearCorrelation, rankCorrelation)
+    interpretation = correlMsg(linearCorrelation, "pearson") + " & " + correlMsg(rankCorrelation, "spearman") + " "
 
     
     if printReport and ttl != "-": 
-        if abs(linearCorrelation) > 0.8 or abs(anyCorrelation) > 0.8: 
+        if abs(linearCorrelation) > 0.8 or abs(rankCorrelation) > 0.8: 
                 print("    - " + ttl + ": " + interpretation + corrAmount[1:-1])
         return corrAmount
     
     if ttl != "-":
-        return corrAmount, linearCorrelation
+        #return corrAmount, linearCorrelation maybe this was better
+        return corrAmount, max(abs(linearCorrelation), abs(rankCorrelation))
     
     #print("Correlations.py - I was supposed to return two numbers {}{} and reach this point.".format(linearCorrelation, anyCorrelation))
     #raise Exception("Returning da minimum. {}, {} => {}".format(linearCorrelation, anyCorrelation, min(linearCorrelation, anyCorrelation)))
-    return linearCorrelation, anyCorrelation
+    return linearCorrelation, rankCorrelation
 
 def correlData2(x, y, context="-", showAmount=True, printReport=True):
     linearCorrelation, anyCorrelation = pearsonCorrelation(x, y), spearmanCorrelation(x, y)
@@ -133,14 +133,7 @@ def correlMsg(corrVal, corrNam):
         return "{}{} {}".format(strength, sign, property)
 # Report distribution data in a nice way
 def distReport(metricName, linearCorrelations, coals = ""):
-    whatIsThis = "distribution"
-    """if type(linearCorrelations) != list: linearCorrelations = [linearCorrelations, linearCorrelations]
-    if len(linearCorrelations) == 2: 
-        linearCorrelations = ["x", "x"] + linearCorrelations
-        whatIsThis = "correlation"
-    elif len(linearCorrelations) != 4: 
-        raise Exception("I need 4 values here.")"""
-    
+    whatIsThis = "distribution"    
     # Determine chance to be exp and pow
     sa = ""; sb = ""
     if len(linearCorrelations) >= 4:
@@ -153,8 +146,9 @@ def distReport(metricName, linearCorrelations, coals = ""):
         if powProb > 1: s2 = "Error"
         elif powProb > 0.8: s2 =" probably is power {} ({:.2%}).".format(whatIsThis, powProb)
 
-        if s1 == "" or s2 == "": s = s1+s2 # Just one is ok
-        elif s1 == "error" or s2 == "error": s = "error" # Error completely delegitimizes
+        # Conclude
+        if s1 == "" or s2 == "": sa = s1+s2 # Just one is ok
+        elif s1 == "error" or s2 == "error": sa = "error" # Error completely delegitimizes
         else: 
             sa = s1 if expProb > powProb else s2 # Take stronger one
             sa = "+{:.2%} {} likelier a".format(abs(expProb-powProb), coals) + sa[len(" probably is"):]
@@ -171,17 +165,19 @@ def distReport(metricName, linearCorrelations, coals = ""):
         if powProb > 1: s2 = "Error"
         elif powProb > 0.8: s2 = "probably is power {} ({:.2%}).".format(whatIsThis, powProb)
 
-        if s1 == "" or s2 == "": s = s1+s2 # Just one is ok
-        elif s1 == "error" or s2 == "error": s = "error" # Error completely delegitimizes
+        # Conclude
+        if s1 == "" or s2 == "": sb = s1+s2 # Just one is ok
+        elif s1 == "error" or s2 == "error": sb = "error" # Error completely delegitimizes
         else: 
             sb = s1 if expProb > powProb else s2 # Take stronger one
             sb = "+{:.2%} likelier a".format(abs(expProb-powProb)) + sb[len(" probably is"):]
 
         # Still nothing? Damn.
         if sb == "": sb="very uninteresting, chances exp: {:.2%},  pow: {:.2%}.".format(expProb, powProb)
-        
-    retVala = "    - " + metricName + "(coals): " + sa[1:]
-    retValb = "    - " + metricName + "(noncoals): " + sb[1:]
+
+    # Kakav je ovo raspad TODO    
+    retVala = "    - " + metricName + "(coals): " + sa
+    retValb = "    - " + metricName + "(noncoals): " + sb
     #print(retVal) 
     return retVala + "\n" + retValb
 

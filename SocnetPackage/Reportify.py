@@ -1,18 +1,18 @@
 from pathlib import Path
 from statistics import correlation
 from mdutils.mdutils import MdUtils
-from mdutils import Html
 from .BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
 from SocnetPackage.Metrics.GraphMetrics import graphMetrics
 from SocnetPackage.Metrics.NodeMetrics import nodeMetrics
 from SocnetPackage.MetricPlots import doMetric, distributions, correlations
 from SocnetPackage.GraphVisualisation import showGraphs, showGraph
 
-G, G2, mdFile, comps, coal, dataSourceName = None, None, None, None, None, None
+
+G, G2, mdFile, comps, coal, nonc, dataSourceName = None, None, None, None, None, None, None
 
 # Helper function for doing subreports for: Graph, Clusters, Graph of Clusters
 def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam ime", components = None, romanNumeral = ""):
-    global G, G2, dataSourceName, comps, coal, mdFile
+    global G, G2, dataSourceName, comps, coal, nonc, mdFile
     mdFile = MdUtils(file_name="Report/{}/{}".format(dataSourceName, inputName), title="{} report".format(dataSourceName))
     Graph = G2 if inputName == "Graph_of_components" else G # Clear up which graph
     
@@ -23,19 +23,22 @@ def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
     #region If we started with multiple things, great (so, not the original graph, or graph of components)
     if type(Inputs) == list: 
         # print("---------------------------------\nInput: {}. Target: a list of components".format(inputName))
-        showGraphs(Inputs, inputName, sourceDataFileName=dataSourceName, graphName=inputName)
+        showGraphs(coal, "Coalitions", sourceDataFileName=dataSourceName, graphName=inputName)
+        showGraphs(nonc, "Noncoalitions", sourceDataFileName=dataSourceName, graphName=inputName)
 
         Graph = Inputs
         targetsOfMetric = None
 
-        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/SocialNetwork.png".format(dataSourceName, inputName)))
+        mdFile.new_line(mdFile.new_inline_image(text="Coalitions", path="/Report/{}/{}/Coalitions.png".format(dataSourceName, inputName)))
+        mdFile.new_line(mdFile.new_inline_image(text="Noncoalitions", path="/Report/{}/{}/Noncoalitions.png".format(dataSourceName, inputName)))
+        
     #endregion
 
     #region Otherwise, tackle the one thing (optional), and move onto multiple things
     else:
         #print("---------------------------------\nINPUT: {}\nTARGET: nodes".format(inputName))
         # TODO: unroll with kcore for huge SocNets, we dont have to see unrelevant guys and it showcases exp/pow growth
-        showGraph(Inputs, components, inputName)
+        showGraph(Inputs, components, inputName, withLabels= (inputName != "Original_graph"), sourceDataFileName = dataSourceName)
         # TODO DRAW GRAPH BUT WITH NODES COLORED THE INTENSITY OF METRIC
         #print("---------------------------------\nOPTIONAL REPORT - {}: \njust single values, metrics of the {}".format(inputName, inputName))
         targetsOfMetric = list(Inputs.nodes())
@@ -58,39 +61,45 @@ def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
     metricNames = []
     for met, nam in metrics:
         val = doMetric(Graph, targetsOfMetric, met, nam)
-        print("   - ", nam, val)
+        print("   * {} {}".format(nam, val if len(val) < 10 else "{} values...".format(len(val))))
         metricsVals.append(val)
         metricNames.append(nam)
 
     # Distribution and correlation data
-    global coal;
     distributions(metricsVals, metricNames, inputName, coal, comps, dataSourceName)
-    metricTable, corrTable = correlations(targetsOfMetric, metricsVals, metricNames, inputName, coal, comps, dataSourceName)
+    metricTable, corrTable, reportThisText = correlations(targetsOfMetric, metricsVals, metricNames, inputName, coal, comps, dataSourceName)
     #endregion
-
+    
     #region Write them in the same order in the report
     mdFile.new_header(level=2, title="MAIN REPORT - {} : metrics of the targets table".format(inputName))
     mdFile.new_paragraph(metricTable) 
 
 
     mdFile.new_header(level=2, title="MAIN REPORT - {}: metric distribution plots".format(inputName))
+    mdFile.new_paragraph(reportThisText) 
     for plottedMetric in metricNames:
         mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/{}_Distr.png".format(dataSourceName, inputName, plottedMetric)))
 
 
     mdFile.new_header(level=2, title="MAIN REPORT - {}: metric correlations table and plots".format(inputName))
     mdFile.new_paragraph(corrTable) 
+    mdFile.new_line("\nCorrelation table visualized:\n")
+    mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/CORR_COLORMAP.png".format(dataSourceName, inputName)))
+
     for metricName1 in metricNames:
         for metricName2 in metricNames:
-            mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/{}_{}.png".format(dataSourceName, inputName, metricName1, metricName2)))
+            path = "/Report/{}/{}/{}_{}.png".format(dataSourceName, inputName, metricName1, metricName2); import os
+            if os.path.exists(path):
+                mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path=path))
     
     #endregion End this subreport
+    
     mdFile.new_paragraph("---\n\n---") 
     mdFile.create_md_file()
 
 # Msin gunvyion when give a graph loaded from file or elsewhere
 def handleGraphInput(G1, dataSourceName1):
-    global G, G2, mdFile, comps, coal, dataSourceName
+    global G, G2, mdFile, comps, coal, nonc, dataSourceName
     G = G1; dataSourceName = dataSourceName1
 
     #region Report initialize
@@ -109,8 +118,8 @@ def handleGraphInput(G1, dataSourceName1):
 
     #region Get new separate data
     # Clusterize
-    comps = Clusters.BFSComponents(G)
-    coal, nonc, problemEdges = Coalitions.filterComponents(comps)
+    coal, nonc, problemEdges = Clusters.BFSComponents(G)
+    comps = coal + nonc
     G2 = GraphOfClusters.create(G)
 
     # By clusterizing, we've set up three branches

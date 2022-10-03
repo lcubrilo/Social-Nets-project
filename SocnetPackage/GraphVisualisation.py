@@ -26,7 +26,7 @@ def showComponentNames(pos, components):
     else: showComponentName(pos, components)
 
 # TODO check if this still makes sense
-def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True):
+def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True, sourceDataFileName = "lolexd"):
     from time import time
     start = time()
     if title == "": title = str(G)
@@ -66,7 +66,10 @@ def showGraph(G, components = [], title = "", AX = None, withLabels = True, font
         font_color=fontColor,
         ax = AX)
     
-    if AX == None:plt.show()
+    if AX == None:
+        plt.savefig(fname="Report/{}/{}/SocialNetwork.png".format(sourceDataFileName, title))
+        plt.show()
+        
     #print(time()-start, G)
 
 # TODO check this too
@@ -77,7 +80,7 @@ def showComponentGraph(components):
     nodeColors = giveColors()
     matrixLength = math.ceil(noComp**0.5)
     #baseNumber = 110*matrixLength;
-    fig, axs = plt.subplots(matrixLength, matrixLength); i=0
+    fig, axs = plt.subplots(matrixLength, matrixLength, figsize=(14,10)); i=0
     for c in components:
         #print(c.nodes, c.edges)
         
@@ -104,66 +107,72 @@ def showGraphAndComponents(G, components, G2, ttl):
     
     #plt.show()
 
-# TODO check if ok, bad or deprecated
-def showGraphs(Graphs, title, maxSize = 4, sourceDataFileName = "", graphName = ""):
+def showGraphs(Graphs, subtitle, maxSize = 4, sourceDataFileName = "", graphName = ""):
     n = min(maxSize**2, len(Graphs))
     if n == 0: return
-    if n == 1: showGraph(Graphs[0], title=title); return
+    if n == 1: showGraph(Graphs[0], title=graphName, sourceDataFileName=sourceDataFileName); return
     matrixSize = math.ceil(math.sqrt(n))
 
     graphs = sample(Graphs, maxSize**2) if n > maxSize**2  else Graphs
-    subtitle = "Coalition " if title[0] == "C" else "Noncoalition " 
-    fig, ax = plt.subplots(matrixSize, matrixSize)
+    #subtitle = "Coalition " if title[0] == "C" else "Noncoalition " 
+    fig, ax = plt.subplots(matrixSize, matrixSize, figsize=(14,10))
     for i in range(matrixSize):
         for j in range(matrixSize):
             graphIndex = i*matrixSize + j
-            if graphIndex > len(graphs): break
+            if graphIndex >= len(graphs): break
             if graphIndex == n-1 or graphIndex == maxSize**2-1: break
             graph = graphs[graphIndex] if type(graphs) == list else graphs
             showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
     
-    fig.suptitle(title)
-    plt.savefig(fname="Report/{}/{}/SocialNetwork.png".format(sourceDataFileName, graphName))
+    fig.suptitle(graphName)
+    plt.savefig(fname="Report/{}/{}/{}.png".format(sourceDataFileName, graphName, subtitle))
 
 #DISTRIBUTIONS
 from math import log2
 from SocnetPackage.Metrics import Correlations
 def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = [], components = [], sourceDataFileName = ""):
-    fig, axs = plt.subplots(2, 2, constrained_layout = True)
+    fig, axs = plt.subplots(2, 2, constrained_layout = True, figsize=(14,10))
     #fig.tight_layout()
 
     xlabels = [metricName]*3 + ["log " + metricName]
     ylabels = ["Frequency", "CCD Frequency", "log CCDF", "log CCDF"]
     titles = ["Distribution of "+metricName, "Complementary cumulative", "Linear == exp distr", "Linear == pow distr"]
     correlations = []
-        
+
+    ###############################    
     # nothing
     # accumulate that
     # log y of that
     # also log x of that
-    #print("X OSA PRE", x_axis)
-    correlMsgs = []
-    def filling(x_axis, y_axis, color = "black"):
+    def fillingAXsCoalNonc(x_axis, y_axis, color = "black", shape="o"):
+        correlMsgs = []
         debugMsg = ""
         for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):  
-            if yl[:3] == "log" and xl[:3] != "log":
-                y_axis = [log2(e) if e>0 else 0.0 for e in y_axis]; ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg); ax.scatter(x_axis, y_axis, c=color); continue;
-            if xl[:3] == "log":
-                x_axis = [log2(e) if e>0 else 0.0 for e in x_axis]; ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg); ax.scatter(x_axis, y_axis, c=color); continue;
-            if yl[:3] == "CCD": 
-                debugMsg = str(y_axis)
-                n = len(y_axis)
-                for i in list(range(n-1, 0, -1)):
+            if xl[:3] == "log": # Fourth step
+                x_axis = [log2(e) if e>0 else 0.0 for e in x_axis]; 
+
+            elif yl[:3] == "log": # Third step
+                y_axis = [log2(e) if e>0 else 0.0 for e in y_axis]; 
+
+            elif yl[:3] == "CCD": # Second step
+                #debugMsg = str(y_axis) 
+                for i in list(range(len(y_axis)-1, 0, -1)):
                     y_axis[i-1] += y_axis[i]
+
+            # First step - just original data
+
+            # Common part
             corrMsg, corrAmount = Correlations.correlData(x_axis, y_axis, xl+"-"+yl, False, printReport=False)
-            ax.scatter(x_axis, y_axis, c=color)
+            ax.set(xlabel=xl, ylabel=yl, title=ttl+corrMsg)
+            ax.scatter(x_axis, y_axis, c=color, marker=shape, s = (800)/(len(x_axis)+1))
             correlMsgs.append(corrMsg)
             #if str(corrAmount) == "nan": continue
             correlations.append(corrAmount)
 
-        for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):
+        return correlMsgs
+        """for (xl, yl, ttl, ax) in zip(xlabels, ylabels, titles, axs.flatten()):
             finalMessage = "Coals" + correlMsgs[0][1:] + "vs Nonc" + correlMsgs[1][1:]
-            ax.set(xlabel=xl, ylabel=yl, title=finalMessage)     
+            #ax.set(xlabel=xl, ylabel=yl, title=finalMessage)    wtf is this line of code???? hope to God I figure that out lmfao TODO  """
 
         #if yl[:3] == "CCD": print("CCD",metricName,debugMsg,y_axis)
         #print("X OSA POSLE", x_axis)
@@ -174,20 +183,33 @@ def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = []
         else:
             arg = "(coalition)"
         Correlations.distReport(metricName, correlations, arg)
-    
-    if coalitions == [] and components == []: filling(x_axis, y_axis)
+    ###############################
+
+    # We're just doing a normal distribution
+    if coalitions == [] and components == []: 
+        fillingAXsCoalNonc(x_axis, y_axis)
+
+    # We're doing a distr of 2 things together
     else:
         coalX_axis, coalY_axis = [], []
         nonCX_axis, nonCY_axis = [], []
+
+        # Separate components into either coal or nonc
         for x, y, comp in zip(x_axis, y_axis, components):
             if comp in coalitions:
                 coalX_axis.append(x); coalY_axis.append(y)
             else:
                 nonCX_axis.append(x); nonCY_axis.append(y)
-        filling(coalX_axis, coalY_axis, "blue")
-        filling(nonCX_axis, nonCY_axis, "red")
-        
 
+        # Fill within two tries/layers on same AXs
+        msg1 = fillingAXsCoalNonc(coalX_axis, coalY_axis, "blue", "s")
+        msg2 = fillingAXsCoalNonc(nonCX_axis, nonCY_axis, "red", "d")
+
+        # I need correlations of both
+        for ax, m1, m2 in zip(axs.flatten(), msg1, msg2):
+            ax.set(title="Coals" + m1[1:] + "vs Nonc" + m2[1:])
+        
+    ###############################
     suptitle = "{} - {}".format(metricName.upper(), graphName)
     plt.suptitle(suptitle)
     #plt.subplots_adjust(left=0.25, right=0.8, bottom=0.2, top=0.8, wspace= 0.4, hspace=0.8)
@@ -203,12 +225,12 @@ def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName =
     #if min(corr1, corr2) < 0.9: 
     #    raise Exception("GraphVisualization.py finds you not worthy")
         
-    fig, axs = plt.subplots(1, 1, constrained_layout = True) #(2, 2, constrained_layout = True)
+    fig, axs = plt.subplots(1, 1, constrained_layout = True, figsize=(14,10)) #(2, 2, constrained_layout = True)
     
     ttl = "{} & {}".format(metricName1.upper(), metricName2.upper())
     title = ttl#+Correlations.distReport(ttl, [corr1, corr1])
     axs.set(xlabel=metricName1, ylabel=metricName2, title=graphName.upper()+"-"+title)
-    axs.scatter(x_axis, y_axis)
+    axs.scatter(x_axis, y_axis, s=(800)/len(x_axis))
     print("Report", sourceDataFileName, graphName, metricName1, metricName2, "_Distr.png")
     plt.savefig(fname="Report/{}/{}/{}_{}.png".format(sourceDataFileName, graphName, metricName1, metricName2))
     #plt.show()
