@@ -92,7 +92,7 @@ def showComponentGraph(components):
         AX = axs[i//matrixLength, i%matrixLength] if matrixLength > 1 else axs
         nx.draw(c, pos, node_color = nodeColor, edge_color=edgeColors, width=2, with_labels=True, ax = AX); i+=1
         showComponentNames(pos, c)
-    plt.show(block=True)
+    #plt.show(block=True)
 
 # TODO check if this deprecated
 def showGraphAndComponents(G, components, G2, ttl):
@@ -102,7 +102,7 @@ def showGraphAndComponents(G, components, G2, ttl):
     showGraph(G2, AX = ax1)
     showGraph(G, components, AX = ax2)
     
-    plt.show()
+    #plt.show()
 
 # TODO check if ok, bad or deprecated
 def showGraphs(Graphs, title, maxSize = 4):
@@ -123,12 +123,12 @@ def showGraphs(Graphs, title, maxSize = 4):
             showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
     
     fig.suptitle(title)
-    plt.show()
+    #plt.show()
 
 #DISTRIBUTIONS
 from math import log2
 from SocnetPackage.Metrics import Correlations
-def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = [], components = []):
+def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = [], components = [], sourceDataFileName = ""):
     fig, axs = plt.subplots(2, 2, constrained_layout = True)
     #fig.tight_layout()
 
@@ -191,12 +191,12 @@ def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = []
     suptitle = "{} - {}".format(metricName.upper(), graphName)
     plt.suptitle(suptitle)
     #plt.subplots_adjust(left=0.25, right=0.8, bottom=0.2, top=0.8, wspace= 0.4, hspace=0.8)
-    plt.savefig(suptitle+'.pdf')
-    plt.show()
+    plt.savefig(fname="Report\\{}\\{}\\{}_Distr.png".format(sourceDataFileName, graphName, metricName))
+    #plt.show()
     plt.close()
 
 #CORRELATIONS TODO
-def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName = "", coalitions = [], components = []):
+def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName = "", coalitions = [], components = [], sourceDataFileName = ""):
     #print("GraphVisualization.py, correlData trying to get 2 numbers {}".format(Correlations.correlData(x_axis, y_axis)))
     #corr1, corr2 = Correlations.correlData(x_axis, y_axis)
     #if min(corr1, corr2) < 0.9: 
@@ -208,6 +208,6 @@ def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName =
     title = ttl#+Correlations.distReport(ttl, [corr1, corr1])
     axs.set(xlabel=metricName1, ylabel=metricName2, title=graphName.upper()+"-"+title)
     axs.scatter(x_axis, y_axis)
-    plt.savefig(ttl+'corr.pdf')
+    plt.savefig(fname="Report\\{}\\{}\\{}_{}.png".format(sourceDataFileName, graphName, metricName1, metricName2))
     #plt.show()
     plt.close()

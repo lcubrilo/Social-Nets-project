@@ -16,7 +16,7 @@ def doMetric(Graph, targetsOfMetric, metric, metricName):
 # See distribution for a metric; List input is called "things"
 # x-axis: metricVals = doMetric(things)
 # y-axis: count(mV); mV € metricVals
-def distributions(metricsVals, metricNames = "", thingName = "", coalitions = [], components = []): 
+def distributions(metricsVals, metricNames = "", thingName = "", coalitions = [], components = [], fileName = ""): 
     """ 
    DEPRECATED: just give me values, don't make me calc them
    #If input not a list make it a list
@@ -60,7 +60,7 @@ def distributions(metricsVals, metricNames = "", thingName = "", coalitions = []
         for key in sorted(valFreq.keys()):
             x.append(key); y.append(valFreq[key])
 
-        showDistribution(x, y, metricNam, thingName, coalitions, components)
+        #showDistribution(x, y, metricNam, thingName, coalitions, components, fileName)
     
     return# values, frequency
 
@@ -93,7 +93,7 @@ def shorterMetricNames(metricNames):
         "radius":"rad", 
         "averageClusteringCoefficient":"avgClusC"
     }"""
-def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [], components = []):
+def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [], components = [], sourceInputFileNAme = ""):
     """
     DEPRECATED
     # If input not a list, make it a list
@@ -136,7 +136,8 @@ def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [],
             plt.text((i*1.015+0.35)/len(MetricNames), (j*1.015+0.35)/len(MetricNames), str(round(currCorr*100, 2))+"%", transform=ax.transAxes)
             if i>=j: continue
             if currCorr > 0.8:
-                showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName)
+                #showCorrelation(df[MetricNames[i], df[nam2]])
+                #showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName, sourceInputFileNAme)
                 print(Correlations.distReport("{}-{}".format(nam1, nam2), [currCorr, corrMat2[nam1][nam2]]))
             #else:
                 #print("{}&{} combo was fruitless.".format(nam1, nam2))
@@ -144,5 +145,7 @@ def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [],
     ax.set(title = "Red and green strong correlations, purple and olive medium, blue weak, black empty")
     ax.scatter(plotX, plotY, sizes, colors, alpha = 0.8)
     fig.suptitle("(DIS)/(A)/(NON)SORTATIVITY (more green, red, blue respectively): Correlation between metrics for "+graphName)
-    plt.savefig(graphName+'correlations colormapped.pdf')
-    plt.show()
+    plt.savefig(fname="Report/{}/{}/CORR_COLORMAP.png".format(sourceInputFileNAme, graphName))
+    #TODO
+    #plt.show()
+    return df.to_markdown(), corrMat.to_markdown()
