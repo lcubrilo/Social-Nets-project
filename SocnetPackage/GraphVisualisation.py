@@ -105,7 +105,7 @@ def showGraphAndComponents(G, components, G2, ttl):
     #plt.show()
 
 # TODO check if ok, bad or deprecated
-def showGraphs(Graphs, title, maxSize = 4):
+def showGraphs(Graphs, title, maxSize = 4, sourceDataFileName = "", graphName = ""):
     n = min(maxSize**2, len(Graphs))
     if n == 0: return
     if n == 1: showGraph(Graphs[0], title=title); return
@@ -123,7 +123,7 @@ def showGraphs(Graphs, title, maxSize = 4):
             showGraph(graph, AX = ax[i, j], showComponents=False, title=subtitle + getComponentName(graph))
     
     fig.suptitle(title)
-    #plt.show()
+    plt.savefig(fname="Report/{}/{}/SocialNetwork.png".format(sourceDataFileName, graphName))
 
 #DISTRIBUTIONS
 from math import log2
@@ -191,7 +191,8 @@ def showDistribution(x_axis, y_axis, metricName, graphName = "", coalitions = []
     suptitle = "{} - {}".format(metricName.upper(), graphName)
     plt.suptitle(suptitle)
     #plt.subplots_adjust(left=0.25, right=0.8, bottom=0.2, top=0.8, wspace= 0.4, hspace=0.8)
-    plt.savefig(fname="Report\\{}\\{}\\{}_Distr.png".format(sourceDataFileName, graphName, metricName))
+    print("Report", sourceDataFileName, graphName, metricName, "_Distr.png")
+    plt.savefig(fname="Report/{}/{}/{}_Distr.png".format(sourceDataFileName, graphName, metricName))
     #plt.show()
     plt.close()
 
@@ -208,6 +209,7 @@ def showCorrelation(x_axis, y_axis, corr1, metricName1, metricName2, graphName =
     title = ttl#+Correlations.distReport(ttl, [corr1, corr1])
     axs.set(xlabel=metricName1, ylabel=metricName2, title=graphName.upper()+"-"+title)
     axs.scatter(x_axis, y_axis)
-    plt.savefig(fname="Report\\{}\\{}\\{}_{}.png".format(sourceDataFileName, graphName, metricName1, metricName2))
+    print("Report", sourceDataFileName, graphName, metricName1, metricName2, "_Distr.png")
+    plt.savefig(fname="Report/{}/{}/{}_{}.png".format(sourceDataFileName, graphName, metricName1, metricName2))
     #plt.show()
     plt.close()

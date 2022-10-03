@@ -7,4 +7,4 @@ Path("Report").mkdir(parents=True, exist_ok=True)
 
 if __name__ == "__main__":
     #handleGraphInput(SmallExamples.buildGraph())
-    handleGraphInput(GenerateBigNets.bigNet(250), "bigNet")
+    handleGraphInput(GenerateBigNets.bigNet(50), "bigNet")

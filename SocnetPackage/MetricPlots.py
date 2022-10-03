@@ -7,7 +7,10 @@ import networkx as nx
 def doMetric(Graph, targetsOfMetric, metric, metricName): 
     if targetsOfMetric != None:
         if type(targetsOfMetric) == list:
-            return [metric(Graph, target) for target in targetsOfMetric]
+            retVal = []
+            for target in targetsOfMetric:
+                retVal.append(metric(Graph, target))
+            return retVal
     elif type(Graph) == list:
         return [metric(G) for G in Graph]
     else: #Got just one (should happen only in the optional pre-report)
@@ -60,7 +63,7 @@ def distributions(metricsVals, metricNames = "", thingName = "", coalitions = []
         for key in sorted(valFreq.keys()):
             x.append(key); y.append(valFreq[key])
 
-        #showDistribution(x, y, metricNam, thingName, coalitions, components, fileName)
+        showDistribution(x, y, metricNam, thingName, coalitions, components, fileName)
     
     return# values, frequency
 
@@ -136,8 +139,7 @@ def correlations(Thing, metricsVals, MetricNames, graphName="", coalitions = [],
             plt.text((i*1.015+0.35)/len(MetricNames), (j*1.015+0.35)/len(MetricNames), str(round(currCorr*100, 2))+"%", transform=ax.transAxes)
             if i>=j: continue
             if currCorr > 0.8:
-                #showCorrelation(df[MetricNames[i], df[nam2]])
-                #showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName, sourceInputFileNAme)
+                showCorrelation(df[MetricNames[i]], df[nam2], currCorr, nam1, nam2, graphName, sourceDataFileName=sourceInputFileNAme)
                 print(Correlations.distReport("{}-{}".format(nam1, nam2), [currCorr, corrMat2[nam1][nam2]]))
             #else:
                 #print("{}&{} combo was fruitless.".format(nam1, nam2))

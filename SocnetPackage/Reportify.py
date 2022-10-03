@@ -1,4 +1,5 @@
 from pathlib import Path
+from statistics import correlation
 from mdutils.mdutils import MdUtils
 from mdutils import Html
 from .BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
@@ -10,11 +11,11 @@ from SocnetPackage.GraphVisualisation import showGraphs, showGraph
 G, G2, mdFile, comps, coal, dataSourceName = None, None, None, None, None, None
 
 # Helper function for doing subreports for: Graph, Clusters, Graph of Clusters
-def reportify(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam ime", components = None, romanNumeral = ""):
+def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam ime", components = None, romanNumeral = ""):
     global G, G2, dataSourceName, comps, coal, mdFile
-    mdFile = MdUtils(file_name="Report"+dataSourceName, title="{} report".format(dataSourceName))
-    Graph = G2 if inputName == "Graph of components" else G # Clear up which graph
-
+    mdFile = MdUtils(file_name="Report/{}/{}".format(dataSourceName, inputName), title="{} report".format(dataSourceName))
+    Graph = G2 if inputName == "Graph_of_components" else G # Clear up which graph
+    
     # Create header for this subreport
     mdFile.new_header(level=1, title=romanNumeral + " " + inputName)
     mdFile.new_header(level=2, title="Visualize")
@@ -22,12 +23,12 @@ def reportify(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
     #region If we started with multiple things, great (so, not the original graph, or graph of components)
     if type(Inputs) == list: 
         # print("---------------------------------\nInput: {}. Target: a list of components".format(inputName))
-        showGraphs(Inputs, inputName)
+        showGraphs(Inputs, inputName, sourceDataFileName=dataSourceName, graphName=inputName)
 
         Graph = Inputs
         targetsOfMetric = None
 
-        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="Report" + dataSourceName + inputName + "SocialNetwork.png"))
+        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/SocialNetwork.png".format(dataSourceName, inputName)))
     #endregion
 
     #region Otherwise, tackle the one thing (optional), and move onto multiple things
@@ -38,7 +39,7 @@ def reportify(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
         # TODO DRAW GRAPH BUT WITH NODES COLORED THE INTENSITY OF METRIC
         #print("---------------------------------\nOPTIONAL REPORT - {}: \njust single values, metrics of the {}".format(inputName, inputName))
         targetsOfMetric = list(Inputs.nodes())
-        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="Report" + dataSourceName + inputName + "SocialNetwork.png"))
+        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/SocialNetwork.png".format(dataSourceName, inputName)))
         
         mdFile.new_header(level=2, title="OPTIONAL REPORT - {}: \njust single values, metrics of the {}".format(inputName, inputName))
         s = "" 
@@ -48,7 +49,7 @@ def reportify(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
         mdFile.new_paragraph(s) # Print the optional part of report
         # print("We may now proceed")
         # TODO edges? I think only in corr; can't see logic in distr
-
+    #endregion
     
     #region Get important data
     
@@ -74,14 +75,14 @@ def reportify(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
 
     mdFile.new_header(level=2, title="MAIN REPORT - {}: metric distribution plots".format(inputName))
     for plottedMetric in metricNames:
-        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="Report/{}/{}/{}_Distr.png".format(dataSourceName, inputName, plottedMetric)))
+        mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/{}_Distr.png".format(dataSourceName, inputName, plottedMetric)))
 
 
     mdFile.new_header(level=2, title="MAIN REPORT - {}: metric correlations table and plots".format(inputName))
     mdFile.new_paragraph(corrTable) 
     for metricName1 in metricNames:
         for metricName2 in metricNames:
-            mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="Report/{}/{}/{}_{}.png".format(dataSourceName, inputName, metricName1, metricName2)))
+            mdFile.new_line(mdFile.new_inline_image(text="Indeed, image", path="/Report/{}/{}/{}_{}.png".format(dataSourceName, inputName, metricName1, metricName2)))
     
     #endregion End this subreport
     mdFile.new_paragraph("---\n\n---") 
@@ -97,7 +98,7 @@ def handleGraphInput(G1, dataSourceName1):
     Path("Report", dataSourceName).mkdir(parents=True, exist_ok=True)
 
     # Make three subfolders
-    threeThingsToReport = ["Original graph", "Components", "Graph of components"]
+    threeThingsToReport = ["Original_graph", "Components", "Graph_of_components"]
     for subfolder in threeThingsToReport:
         Path("Report", dataSourceName, subfolder).mkdir(parents=True, exist_ok=True)
 
@@ -125,9 +126,9 @@ def handleGraphInput(G1, dataSourceName1):
     #endregion
 
     # Branch off
-    reportify(G, nodeMetrics(), graphMetrics(), inputName = threeThingsToReport[0], components=comps, romanNumeral="I")
-    reportify(comps, graphMetrics(), inputName = threeThingsToReport[1], romanNumeral="II")
-    reportify(G2, nodeMetrics(), graphMetrics(), inputName = threeThingsToReport[2], romanNumeral="III")
+    subreport(G, nodeMetrics(), graphMetrics(), inputName = threeThingsToReport[0], components=comps, romanNumeral="I")
+    subreport(comps, graphMetrics(), inputName = threeThingsToReport[1], romanNumeral="II")
+    subreport(G2, nodeMetrics(), graphMetrics(), inputName = threeThingsToReport[2], romanNumeral="III")
     
     # Finalize report
     #mdFile.create_md_file()
