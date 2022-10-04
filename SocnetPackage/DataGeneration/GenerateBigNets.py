@@ -5,7 +5,7 @@ from ..ComponentNamesColors import iterateThruComponentNames
 from math import log, ceil
 #import GraphVisualisation
 
-def bigGraph(numOfNodes, clusterable = True):
+def bigNet(numOfNodes, clusterable = True):
     nodesMade = 0
     components = []
     currCompName = "A"   
@@ -21,7 +21,7 @@ def bigGraph(numOfNodes, clusterable = True):
     
     """for c in components:
         print(c.nodes)
-"""
+    """
     
     #GraphVisualisation.showComponentGraph(components)
     graphOfComponents = generateGraphOfComponents(components)
@@ -36,42 +36,26 @@ def bigGraph(numOfNodes, clusterable = True):
             res.add_edge(u, v, color="red")
 
     return res
-    """
-    Very meta: since this method didn't work as intended, had to put it to the chopping block... look how they massacred my boy
-        p = (1/log(numOfNodes, 2))
-        #print("Ruin at least{}% of clusters".format(round(p*100, 2)))
-        numberToRuin = ceil(p*len(components))
-        print("Ruin exactly {} clusters".format(numberToRuin))
-        for myBoy in sample(population=components, k=numberToRuin):
-            lookHowTheyMassacred(myBoy)
 
-    
-
-def lookHowTheyMassacred(component):
-    listOfEdges = list(component.edges)
-    howManyEdgesToRuin = poisson(ceil(0.05*len(listOfEdges))) + 1
-    whichEdgesToRuin = sample(listOfEdges, howManyEdgesToRuin)
-    for edge in whichEdgesToRuin:
-        component.add_edge(edge[0], edge[1], color = "red")"""
 
 def graphOfComponents2BigGraph(g, components):
     BigGraph = nx.Graph()
     for c in components:
         BigGraph.add_edges_from(c.edges, color="green")
 
-    print("Converting it to big graph")
+    #print("Converting it to big graph")
     for edge in g.edges:
         c1, c2 = edge[0], edge[1]
         connect2Components(BigGraph, c1, c2, int(random()*4)+1)
     
-    print("Got big graph")
+    #print("Got big graph")
     return BigGraph
 
 def generateGraphOfComponents(components):
     G = nx.Graph()
     G.add_nodes_from(components)
 
-    print("Got graph of components")
+    #print("Got graph of components")
     return generateComponent(2, startingGraph=G)
 
 def connect2Components(G, c1, c2, L):

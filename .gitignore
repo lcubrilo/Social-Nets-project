@@ -4,8 +4,9 @@ __pycache__
 
 #For now, ignore printed figures
 Figures
+# Report
 *.dot 
-*.png
+#*.png
 #including dot files
 
 #Gave up on those files

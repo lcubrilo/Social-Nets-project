@@ -1,4 +1,3 @@
-from tabnanny import check
 import networkx as nx
 from collections import deque
 from ..ComponentNamesColors import iterateThruComponentNames, giveColors
@@ -12,23 +11,26 @@ def checkForNegative(G, cluster):
                 if G.edges[node1, node2]["color"] == "red":
                     cluster.add_edge(node1, node2, color="red")
 
-
+problemEdges = []
+nonc = []
+coal = []
 def BFSComponents(G, legitimateLinksFunction = None):
+    nx.set_node_attributes(G, None, "component")
     visited = []
     components = []
     componentName = "A"
     def BFSComponent(node, compName):
+        global problemEdges, nonc
         comp = nx.Graph()
         queue = deque()
         thisComponentsColor = choice(list(giveColors()))
 
         def pushNode(x):
-            comp.add_node(x, component = compName)
+            comp.add_node(x, component = compName, color = thisComponentsColor)
             G.nodes[x]["component"] = compName
             G.nodes[x]["color"] = thisComponentsColor
             visited.append(x)
             queue.append(x)
-        
         def onlyPositiveNeighbors(x):
             positiveNeighbors = []
             for neighbor in G.neighbors(x):
@@ -40,8 +42,17 @@ def BFSComponents(G, legitimateLinksFunction = None):
         while queue:
             curr = queue.popleft()
 
-            for neighbor in onlyPositiveNeighbors(curr): #TODO: not all neighbors, just positive ones
-                comp.add_edge(curr, neighbor, color = "green")
+            for neighbor in G.neighbors(curr):
+                if G.edges[curr, neighbor]["color"] == "green" :
+                    comp.add_edge(curr, neighbor, color = "green")
+
+                elif G.nodes[neighbor]["component"] == comp:
+                    comp.add_edge(curr, neighbor, color = "red")
+                    problemEdges.append(curr, neighbor)
+                    nonc.append(comp)
+                    continue;
+                else: continue;
+
                 if neighbor not in visited:
                     pushNode(neighbor)
 
@@ -50,12 +61,14 @@ def BFSComponents(G, legitimateLinksFunction = None):
     #G = nx.Graph()
     for node in G:
         if node not in visited:
+            # ????????? TODO
             components.append(BFSComponent(node, componentName))
             componentName = iterateThruComponentNames(componentName)
 
     for component in components:
-        checkForNegative(G, component)
+        if component not in nonc:
+            coal.append(component)
 
-    return components
+    return coal, nonc, problemEdges
 
     
