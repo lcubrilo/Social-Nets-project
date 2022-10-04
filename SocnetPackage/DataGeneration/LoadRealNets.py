@@ -1,9 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-
+G = nx.Graph()
 def loadWiki(limiter = -1):
-    G = nx.Graph(); i = 0
-                        
+    global G; G = nx.Graph(); i = 0
+    print("Loading from original file")                    
     with open(r"SocnetPackage\DataGeneration\wiki-RfA.txt", 'r', encoding="utf8") as f:
         users = {}
         for line in f:
@@ -28,7 +28,7 @@ def loadWiki(limiter = -1):
     graphToTxt(G, fastLoader["wiki"][1])
     return G  
 def loadEpinions(limiter = -1):
-    G = nx.Graph(); i = 0
+    global G; G = nx.Graph(); i = 0
                         
     with open(r"SocnetPackage\DataGeneration\soc-sign-epinions.txt", 'r', encoding="utf8") as f:
         users = {}
@@ -49,7 +49,7 @@ def loadEpinions(limiter = -1):
     graphToTxt(G, fastLoader["epinions"][1])
     return G 
 def loadSlashdot(limiter = - 1):
-    G = nx.Graph(); i = 0
+    global G; G = nx.Graph(); i = 0
                         
     with open(r"SocnetPackage\DataGeneration\soc-sign-Slashdot090221.txt", 'r', encoding="utf8") as f:
         users = {}
@@ -81,6 +81,7 @@ def getNet(name):
     (loadFunc, path) = fastLoader[name]
     G = txtToGraph(path)
     if G == False:
+        print("Taking from original file")
         return loadFunc() #TODO: change
     else:
         return G
@@ -101,12 +102,20 @@ def txtToGraph(path = "SocnetPackage\DataGeneration\exported.txt"):
     try:  
         G = nx.Graph()
         with open(path, "r", encoding="utf8") as f:
+            i = 0
             for line in f:
-                if line[0] == "#": continue
+                if line[0] == "#":
+                    continue
                 [u, v, color] = line[:-1].split(", ")
                 G.add_edge(int(u), int(v), color = color)
+
+                i+=1
+                if i % 10000 == 1: 
+                    print("{} lines of data read thus far".format(i))
+            print("Got from quickload file")
             return G
     except:
+        print ("Fail")
         return False
 
 from time import time

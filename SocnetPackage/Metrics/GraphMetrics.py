@@ -47,6 +47,7 @@ def printMetrics(G, trash=None):
 def smallWorldCoefficitent(G, trash=None):
     #if len(G.edges > 6000):
         #return "Nah"
+    return -0.01
     if len(G.nodes) <= 1: return -1
     summa = 0
     for line in nx.all_pairs_shortest_path_length(G):
@@ -57,6 +58,7 @@ def smallWorldCoefficitent(G, trash=None):
     sum([d[u][v] for u in G.nodes for v in G.nodes if u != v])/(n*n-n)
 
 def netEfficiency(G, trash = None):
+    return -0.01
     if len(G.nodes) <= 1: return -1
     summa = 0
     for line in nx.all_pairs_shortest_path_length(G):
@@ -67,6 +69,7 @@ def netEfficiency(G, trash = None):
 
 #Technically node metric
 def eccentricities(G, trash = None, n = None):
+    return -1
     res = {}
     for line in nx.all_pairs_shortest_path_length(G):
         max = 0

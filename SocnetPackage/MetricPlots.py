@@ -5,18 +5,23 @@ import networkx as nx
 # (I obviously need a list of inputs for both)
 
 def doMetric(Graph, targetsOfMetric, metric, metricName): 
-    
+    print("Doing {} on {}".format(metricName, str(Graph)))
     if targetsOfMetric != None:
         if type(targetsOfMetric) == list:
             retVal = []
             for target in targetsOfMetric:
                 retVal.append(metric(Graph, target))
+            print("Done.")
             return retVal
+
     elif type(Graph) == list:
+        print("Done.")
         return [metric(G) for G in Graph]
+
     else: #Got just one (should happen only in the optional pre-report)
         retVal = metric(Graph, targetsOfMetric)
         if type(retVal) != str or retVal != None:
+            print("Done.")
             return retVal
         print("Hjustone.")
 
@@ -30,6 +35,7 @@ def distributions(metricsVals, metricNames = "", thingName = "", coalitions = []
     # We are going through every metric
     print("\n I DISTRIBUTIONS")
     for metricVals, metricNam in zip(metricsVals, metricNames):
+        print("{} started".format(metricNam))
         # We have to discretize with continuous data
         def discretizeIfContinuous(arrayOfWhatShouldBeDiscrete):
             for el in arrayOfWhatShouldBeDiscrete:

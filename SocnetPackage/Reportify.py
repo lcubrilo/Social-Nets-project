@@ -1,5 +1,4 @@
 from pathlib import Path
-from statistics import correlation
 from mdutils.mdutils import MdUtils
 from .BasicFunctionalities import Clusters, Coalitions, GraphOfClusters
 from SocnetPackage.Metrics.GraphMetrics import graphMetrics
@@ -9,6 +8,7 @@ from SocnetPackage.GraphVisualisation import showGraphs, showGraph
 
 
 G, G2, mdFile, comps, coal, nonc, dataSourceName = None, None, None, None, None, None, None
+  
 
 def shortenNam(nam):
     opt1 = ["averageNodeDegree", "netDensity", "sMetric", "smallWorldCoefficitent", "netEfficiency", 'diameter', "radius", "averageClusteringCoefficient"]
@@ -25,12 +25,14 @@ def shortenNam(nam):
 
 # Helper function for doing subreports for: Graph, Clusters, Graph of Clusters
 def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam ime", components = None, romanNumeral = ""):
+    print("submain")
     global G, G2, dataSourceName, comps, coal, nonc, mdFile
-    mdFile = MdUtils(file_name="Report/{}/{}".format(dataSourceName, inputName), title="{} report".format(dataSourceName))
+    #mdFile = MdUtils(file_name="Report/{}/{}".format(dataSourceName, inputName), title="{} report".format(dataSourceName))
     Graph = G2 if inputName == "Graph_of_components" else G # Clear up which graph
     
     # Create header for this subreport
     mdFile.new_header(level=1, title=romanNumeral + " " + inputName)
+    mdFile.new_paragraph("## DROPDOWN:\n  <details>\n  <br>\n  <summary>Show more<br> </summary>\n  <br>  ".format(inputName))
     mdFile.new_header(level=2, title="Visualize")
 
     #region If we started with multiple things, great (so, not the original graph, or graph of components)
@@ -92,14 +94,17 @@ def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
         metricNames.append(nam)
 
     # Distribution and correlation data
+    print("Starting distribution")
     distributions(metricsVals, metricNames, inputName, coal, comps, dataSourceName)
     metricTable, corrTable, reportThisText = correlations(targetsOfMetric, metricsVals, metricNames, inputName, coal, comps, dataSourceName)
     #endregion
     
     #region Write them in the same order in the report
     mdFile.new_header(level=2, title="MAIN REPORT - {} : metrics of the targets table".format(inputName))
+    # Dropdown menu
+    mdFile.new_paragraph("## DROPDOWN:\n  <details>\n  <br>\n  <summary>Show more<br> </summary>\n  <br>  ")
     mdFile.new_paragraph(metricTable) 
-
+    mdFile.new_paragraph("  \n</details>  \n")
 
     mdFile.new_header(level=2, title="MAIN REPORT - {}: metric distribution plots".format(inputName))
     mdFile.new_paragraph(reportThisText) 
@@ -120,11 +125,12 @@ def subreport(Inputs, metrics, optionalPreReportMetrics=None, inputName = "nemam
     
     #endregion End this subreport
     
-    mdFile.new_paragraph("---\n\n---") 
-    mdFile.create_md_file()
+    mdFile.new_paragraph("  \n</details>\n\n---") 
+    #mdFile.create_md_file()
 
 # Msin gunvyion when give a graph loaded from file or elsewhere
 def handleGraphInput(G1, dataSourceName1):
+    print("Started the report on {}".format(dataSourceName1))
     global G, G2, mdFile, comps, coal, nonc, dataSourceName
     G = G1; dataSourceName = dataSourceName1
 
@@ -139,25 +145,21 @@ def handleGraphInput(G1, dataSourceName1):
 
     # Create MarkDown report file
     mdFile = MdUtils(file_name="Report"+dataSourceName, title="{} report".format(dataSourceName))
-    mdFile.new_header(level=1, title=dataSourceName) 
-    #endregion
+    mdFile.new_header(level=1, title=" ")
+
+    # By clusterizing, we've set up three branches
 
     #region Get new separate data
     # Clusterize
     coal, nonc, problemEdges = Clusters.BFSComponents(G)
+    print("Got coalitions and noncoalitions; problematic edges")
     comps = coal + nonc
     G2 = GraphOfClusters.create(G)
-
-    # By clusterizing, we've set up three branches
-    mdFile.new_paragraph("CLUSTERIZATION INTO -> ")
-    mdFile.new_table_of_contents(table_title='Contents', depth=2)
     
     # Write clusterization status in the report
-    if problemEdges != []:
-        mdFile.new_header(level=2, title="This graph is not clusterable.")
-        mdFile.new_header(level=2, title="The following edges are the preventing this: {}".format(problemEdges))
-    else: mdFile.new_header(level=2, title="This graph is clusterable!")
-    mdFile.new_header(level=2, title="There are {} components/clusters. {} coalitions and {} noncoalitions".format(len(comps),len(coal), len(nonc)))
+    isItClusterableStatus = "This graph is not clusterable.\nThe following edges are the preventing this: {}".format(str(problemEdges)) if problemEdges != [] else "This graph is clusterable!"
+    isItClusterableStatus += "There are {} components/clusters. {} coalitions and {} noncoalitions".format(len(comps),len(coal), len(nonc))
+    
     #endregion
 
     # Branch off
@@ -166,4 +168,5 @@ def handleGraphInput(G1, dataSourceName1):
     subreport(G2, nodeMetrics(), graphMetrics(), inputName = threeThingsToReport[2], romanNumeral="III")
     
     # Finalize report
-    #mdFile.create_md_file()
+    mdFile.new_table_of_contents(table_title=isItClusterableStatus, depth=2)
+    mdFile.create_md_file()

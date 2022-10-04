@@ -27,6 +27,10 @@ def showComponentNames(pos, components):
 
 # TODO check if this still makes sense
 def showGraph(G, components = [], title = "", AX = None, withLabels = True, fontColor = "white", showComponents = True, sourceDataFileName = "lolexd", saveDirName = "", suptitle = ""):
+    if len(G.nodes) > 50000:
+        amount = 5
+        return showGraph(nx.k_core(G, amount), components, title, AX, withLabels, fontColor, showComponents, sourceDataFileName, saveDirName, suptitle+" k_cored, k={}".format(amount))
+
     from time import time
     start = time()
     plt.figure(figsize=(14,10))
